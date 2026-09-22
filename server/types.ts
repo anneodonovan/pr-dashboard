@@ -21,8 +21,8 @@ export interface Reviewer {
 }
 
 export interface UnaddressedThread {
-  /** First ~140 chars of the outstanding comment, for a preview. */
-  preview: string
+  /** Full body (markdown) of the outstanding comment. */
+  body: string
   author: string
   url: string
 }

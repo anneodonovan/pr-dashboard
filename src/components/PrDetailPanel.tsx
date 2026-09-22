@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { Pr } from '../../server/types'
 import { formatRelativeTime } from '../lib/formatRelativeTime'
 import { CI_LABEL, REVIEW_CHIP, REVIEW_STATE_LABEL, STALENESS_LABEL, STATUS_LABEL, checkStatusColor } from '../lib/labels'
+import { Markdown } from './Markdown'
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
@@ -36,7 +37,7 @@ export function PrDetailPanel({
   return (
     <>
       <div className="fixed inset-0 z-40 bg-black/50" onClick={onClose} />
-      <div className="fixed right-0 top-0 z-50 h-full w-full max-w-lg overflow-y-auto border-l border-slate-800 bg-slate-900 p-6 shadow-2xl">
+      <div className="fixed right-0 top-0 z-50 h-full w-full max-w-3xl overflow-y-auto border-l border-slate-800 bg-slate-900 p-6 shadow-2xl">
         <div className="flex items-start justify-between gap-3">
           <a
             href={pr.url}
@@ -78,8 +79,8 @@ export function PrDetailPanel({
         {pr.body && (
           <div className="mt-5">
             <div className="mb-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">Description</div>
-            <div className="max-h-48 overflow-y-auto whitespace-pre-wrap rounded-md bg-slate-800/40 p-3 text-sm text-slate-300">
-              {pr.body}
+            <div className="rounded-md bg-slate-800/40 p-3">
+              <Markdown>{pr.body}</Markdown>
             </div>
           </div>
         )}
@@ -130,7 +131,7 @@ export function PrDetailPanel({
             </div>
             <div className="space-y-2">
               {activeThreads.map((t, i) => (
-                <div key={i} className="rounded-md border border-fuchsia-500/20 bg-fuchsia-500/5 px-3 py-2 text-sm">
+                <div key={i} className="rounded-md border border-fuchsia-500/20 bg-fuchsia-500/5 px-3 py-2">
                   <div className="flex items-start justify-between gap-2">
                     <a href={t.url} target="_blank" rel="noreferrer" className="text-xs font-medium text-fuchsia-400 hover:underline">
                       {t.author}
@@ -142,8 +143,11 @@ export function PrDetailPanel({
                       Mark as seen
                     </button>
                   </div>
-                  <a href={t.url} target="_blank" rel="noreferrer" className="mt-0.5 block text-slate-300 hover:text-slate-100">
-                    {t.preview}
+                  <div className="mt-1">
+                    <Markdown>{t.body}</Markdown>
+                  </div>
+                  <a href={t.url} target="_blank" rel="noreferrer" className="mt-1 inline-block text-xs text-fuchsia-400/70 hover:underline">
+                    View on GitHub &#8599;
                   </a>
                 </div>
               ))}
@@ -162,7 +166,7 @@ export function PrDetailPanel({
             {showSeen && (
               <div className="mt-2 space-y-2">
                 {seenThreads.map((t, i) => (
-                  <div key={i} className="rounded-md border border-slate-800 bg-slate-800/20 px-3 py-2 text-sm opacity-60">
+                  <div key={i} className="rounded-md border border-slate-800 bg-slate-800/20 px-3 py-2 opacity-60">
                     <div className="flex items-start justify-between gap-2">
                       <a href={t.url} target="_blank" rel="noreferrer" className="text-xs font-medium text-slate-400 hover:underline">
                         {t.author}
@@ -174,7 +178,9 @@ export function PrDetailPanel({
                         Undo
                       </button>
                     </div>
-                    <div className="mt-0.5 text-slate-400">{t.preview}</div>
+                    <div className="mt-1">
+                      <Markdown>{t.body}</Markdown>
+                    </div>
                   </div>
                 ))}
               </div>

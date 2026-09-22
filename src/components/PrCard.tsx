@@ -49,7 +49,7 @@ export function PrCard({
         {staleness && <span className={`rounded px-2 py-1 text-xs font-medium ${staleness.className}`}>{staleness.label}</span>}
         {activeUnaddressed.length > 0 && (
           <span
-            title={activeUnaddressed.map((t) => `${t.author}: ${t.preview}`).join('\n\n')}
+            title={activeUnaddressed.map((t) => `${t.author}: ${t.body.slice(0, 140)}`).join('\n\n')}
             className="rounded bg-fuchsia-500/15 px-2 py-1 text-xs font-medium text-fuchsia-400"
           >
             {activeUnaddressed.length} unaddressed

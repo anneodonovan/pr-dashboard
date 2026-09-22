@@ -190,7 +190,7 @@ function deriveUnaddressedThreads(threads: RawReviewThread[], viewerLogin: strin
     const last = comments[comments.length - 1]
     if (last.author?.login === viewerLogin) continue
     unaddressed.push({
-      preview: last.body.slice(0, 140),
+      body: last.body,
       author: last.author?.login ?? 'unknown',
       url: last.url,
     })
@@ -213,7 +213,7 @@ function deriveUnaddressedGeneralComment(
     if (comment.author?.__typename === 'Bot') continue
     if (!comment.author) return null
     if (comment.author.login === viewerLogin) return null
-    return { preview: comment.body.slice(0, 140), author: comment.author.login, url: comment.url }
+    return { body: comment.body, author: comment.author.login, url: comment.url }
   }
   return null
 }
