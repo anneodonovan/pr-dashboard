@@ -1,5 +1,3 @@
-<img width="1918" height="1035" alt="Screenshot 2026-09-22 at 16 34 17" src="https://github.com/user-attachments/assets/ad94e277-ab9f-4cbd-9872-6c6713bcdd85" />
-<img width="1919" height="1035" alt="Screenshot 2026-09-22 at 16 33 42" src="https://github.com/user-attachments/assets/39de2d3a-4ceb-4130-8615-7ff537be3027" />
 # PR Dashboard
 
 A personal dashboard for tracking your own open GitHub PRs: which stack
@@ -35,3 +33,10 @@ the local dev server is required.
   your reply isn't the last comment in it.
 - Staleness ("Needs rebase" / "Conflicts") comes from GitHub's own
   `mergeStateStatus`.
+
+## Visual References
+  <img width="1918" height="1035" alt="Screenshot 2026-09-22 at 16 34 17" src="https://github.com/user-attachments/assets/ad94e277-ab9f-4cbd-9872-6c6713bcdd85" />
+  #### Light mode
+
+  <img width="1919" height="1035" alt="Screenshot 2026-09-22 at 16 33 42" src="https://github.com/user-attachments/assets/39de2d3a-4ceb-4130-8615-7ff537be3027" />
+  #### Dark mode
