@@ -51,7 +51,10 @@ const PR_DETAIL_QUERY = `
             }
           }
         }
-        comments { totalCount }
+        comments(first: 50) {
+          totalCount
+          nodes { author { login __typename } body url }
+        }
         latestReviews(first: 30) {
           nodes { author { login ... on User { name } } state submittedAt }
         }
@@ -113,7 +116,7 @@ interface RawPrDetail {
         totalCount: number
         nodes: Array<{ commit: { statusCheckRollup: { state: string; contexts: { nodes: RawCheckContext[] } } | null } }>
       }
-      comments: { totalCount: number }
+      comments: { totalCount: number; nodes: Array<{ author: { login: string; __typename: string } | null; body: string; url: string }> }
       latestReviews: { nodes: Array<{ author: { login: string; name?: string | null } | null; state: string; submittedAt: string }> }
       reviewRequests: { nodes: Array<{ requestedReviewer: { login?: string; name?: string | null } | null }> }
       reviewThreads: { nodes: RawReviewThread[] }
@@ -195,6 +198,26 @@ function deriveUnaddressedThreads(threads: RawReviewThread[], viewerLogin: strin
   return unaddressed
 }
 
+/**
+ * Some reviewers post their overall review as a plain PR comment rather than
+ * (or in addition to) inline review-thread comments. There's no "resolved"
+ * concept for these, so the equivalent signal is: the most recent non-bot
+ * comment in the conversation isn't from the viewer.
+ */
+function deriveUnaddressedGeneralComment(
+  comments: Array<{ author: { login: string; __typename: string } | null; body: string; url: string }>,
+  viewerLogin: string,
+): UnaddressedThread | null {
+  for (let i = comments.length - 1; i >= 0; i--) {
+    const comment = comments[i]
+    if (comment.author?.__typename === 'Bot') continue
+    if (!comment.author) return null
+    if (comment.author.login === viewerLogin) return null
+    return { preview: comment.body.slice(0, 140), author: comment.author.login, url: comment.url }
+  }
+  return null
+}
+
 function deriveStatus(pr: {
   isDraft: boolean
   reviewers: Reviewer[]
@@ -218,6 +241,7 @@ async function fetchPrDetail(nameWithOwner: string, number: number, viewerLogin:
 
   const reviewers = deriveReviewers(pr)
   const rollup = pr.commits.nodes[0]?.commit.statusCheckRollup
+  const unaddressedGeneralComment = deriveUnaddressedGeneralComment(pr.comments.nodes, viewerLogin)
 
   return {
     repo: nameWithOwner,
@@ -236,7 +260,10 @@ async function fetchPrDetail(nameWithOwner: string, number: number, viewerLogin:
     staleness: mapStaleness(pr.mergeStateStatus),
     reviewDecision: pr.reviewDecision,
     reviewers,
-    unaddressedThreads: deriveUnaddressedThreads(pr.reviewThreads.nodes, viewerLogin),
+    unaddressedThreads: [
+      ...deriveUnaddressedThreads(pr.reviewThreads.nodes, viewerLogin),
+      ...(unaddressedGeneralComment ? [unaddressedGeneralComment] : []),
+    ],
     additions: pr.additions,
     deletions: pr.deletions,
     changedFiles: pr.changedFiles,
