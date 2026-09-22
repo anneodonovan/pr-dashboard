@@ -4,7 +4,6 @@ A personal dashboard for tracking your own open GitHub PRs: which stack
 they're in, who's reviewed them, which review comments you haven't replied
 to, and whether they're stale and need a rebase.
 
-Not affiliated with or part of any org repo — standalone local tool.
 
 ## Requirements
 
