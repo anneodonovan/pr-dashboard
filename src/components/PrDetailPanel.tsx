@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Pr } from '../../server/types'
 import { formatRelativeTime } from '../lib/formatRelativeTime'
 import { CI_LABEL, REVIEW_CHIP, REVIEW_STATE_LABEL, STALENESS_LABEL, STATUS_LABEL, checkStatusColor } from '../lib/labels'
@@ -11,10 +12,26 @@ function Stat({ label, value }: { label: string; value: string | number }) {
   )
 }
 
-export function PrDetailPanel({ pr, onClose }: { pr: Pr; onClose: () => void }) {
+export function PrDetailPanel({
+  pr,
+  onClose,
+  isDismissed,
+  dismiss,
+  undismiss,
+}: {
+  pr: Pr
+  onClose: () => void
+  isDismissed: (url: string) => boolean
+  dismiss: (url: string) => void
+  undismiss: (url: string) => void
+}) {
   const staleness = STALENESS_LABEL[pr.staleness]
   const ci = CI_LABEL[pr.ciStatus]
   const status = STATUS_LABEL[pr.status]
+  const [showSeen, setShowSeen] = useState(false)
+
+  const activeThreads = pr.unaddressedThreads.filter((t) => !isDismissed(t.url))
+  const seenThreads = pr.unaddressedThreads.filter((t) => isDismissed(t.url))
 
   return (
     <>
@@ -106,25 +123,62 @@ export function PrDetailPanel({ pr, onClose }: { pr: Pr; onClose: () => void }) 
           </div>
         )}
 
-        {pr.unaddressedThreads.length > 0 && (
+        {activeThreads.length > 0 && (
           <div className="mt-5">
             <div className="mb-1.5 text-xs font-medium uppercase tracking-wide text-fuchsia-400">
-              Unaddressed comments ({pr.unaddressedThreads.length})
+              Unaddressed comments ({activeThreads.length})
             </div>
             <div className="space-y-2">
-              {pr.unaddressedThreads.map((t, i) => (
-                <a
-                  key={i}
-                  href={t.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="block rounded-md border border-fuchsia-500/20 bg-fuchsia-500/5 px-3 py-2 text-sm hover:border-fuchsia-500/40"
-                >
-                  <div className="text-xs font-medium text-fuchsia-400">{t.author}</div>
-                  <div className="mt-0.5 text-slate-300">{t.preview}</div>
-                </a>
+              {activeThreads.map((t, i) => (
+                <div key={i} className="rounded-md border border-fuchsia-500/20 bg-fuchsia-500/5 px-3 py-2 text-sm">
+                  <div className="flex items-start justify-between gap-2">
+                    <a href={t.url} target="_blank" rel="noreferrer" className="text-xs font-medium text-fuchsia-400 hover:underline">
+                      {t.author}
+                    </a>
+                    <button
+                      onClick={() => dismiss(t.url)}
+                      className="shrink-0 rounded border border-slate-700 px-1.5 py-0.5 text-[10px] text-slate-400 hover:border-slate-500 hover:text-slate-200"
+                    >
+                      Mark as seen
+                    </button>
+                  </div>
+                  <a href={t.url} target="_blank" rel="noreferrer" className="mt-0.5 block text-slate-300 hover:text-slate-100">
+                    {t.preview}
+                  </a>
+                </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {seenThreads.length > 0 && (
+          <div className="mt-5">
+            <button
+              onClick={() => setShowSeen((v) => !v)}
+              className="text-xs font-medium uppercase tracking-wide text-slate-500 hover:text-slate-300"
+            >
+              {showSeen ? 'Hide' : 'Show'} {seenThreads.length} marked as seen
+            </button>
+            {showSeen && (
+              <div className="mt-2 space-y-2">
+                {seenThreads.map((t, i) => (
+                  <div key={i} className="rounded-md border border-slate-800 bg-slate-800/20 px-3 py-2 text-sm opacity-60">
+                    <div className="flex items-start justify-between gap-2">
+                      <a href={t.url} target="_blank" rel="noreferrer" className="text-xs font-medium text-slate-400 hover:underline">
+                        {t.author}
+                      </a>
+                      <button
+                        onClick={() => undismiss(t.url)}
+                        className="shrink-0 rounded border border-slate-700 px-1.5 py-0.5 text-[10px] text-slate-400 hover:border-slate-500 hover:text-slate-200"
+                      >
+                        Undo
+                      </button>
+                    </div>
+                    <div className="mt-0.5 text-slate-400">{t.preview}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

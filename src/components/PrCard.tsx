@@ -2,10 +2,19 @@ import type { Pr } from '../../server/types'
 import { formatRelativeTime } from '../lib/formatRelativeTime'
 import { CI_LABEL, REVIEW_CHIP, STALENESS_LABEL, STATUS_LABEL } from '../lib/labels'
 
-export function PrCard({ pr, onSelect }: { pr: Pr; onSelect?: (pr: Pr) => void }) {
+export function PrCard({
+  pr,
+  onSelect,
+  isDismissed,
+}: {
+  pr: Pr
+  onSelect?: (pr: Pr) => void
+  isDismissed: (url: string) => boolean
+}) {
   const staleness = STALENESS_LABEL[pr.staleness]
   const ci = CI_LABEL[pr.ciStatus]
   const status = STATUS_LABEL[pr.status]
+  const activeUnaddressed = pr.unaddressedThreads.filter((t) => !isDismissed(t.url))
 
   return (
     <div
@@ -38,12 +47,12 @@ export function PrCard({ pr, onSelect }: { pr: Pr; onSelect?: (pr: Pr) => void }
         <span className={`rounded px-2 py-1 text-xs font-medium ${status.className}`}>{status.label}</span>
         <span className={`rounded px-2 py-1 text-xs font-medium ${ci.className}`}>{ci.label}</span>
         {staleness && <span className={`rounded px-2 py-1 text-xs font-medium ${staleness.className}`}>{staleness.label}</span>}
-        {pr.unaddressedThreads.length > 0 && (
+        {activeUnaddressed.length > 0 && (
           <span
-            title={pr.unaddressedThreads.map((t) => `${t.author}: ${t.preview}`).join('\n\n')}
+            title={activeUnaddressed.map((t) => `${t.author}: ${t.preview}`).join('\n\n')}
             className="rounded bg-fuchsia-500/15 px-2 py-1 text-xs font-medium text-fuchsia-400"
           >
-            {pr.unaddressedThreads.length} unaddressed
+            {activeUnaddressed.length} unaddressed
           </span>
         )}
       </div>

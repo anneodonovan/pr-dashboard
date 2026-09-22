@@ -1,14 +1,24 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { usePrDashboard } from './api/dashboard'
 import { PrCard } from './components/PrCard'
 import { PrDetailPanel } from './components/PrDetailPanel'
 import { StackGroup } from './components/StackGroup'
 import { formatRelativeTime } from './lib/formatRelativeTime'
+import { useDismissedComments } from './lib/useDismissedComments'
 import type { Pr } from '../server/types'
 
 export default function App() {
   const { data, loading, refreshing, refresh } = usePrDashboard()
   const [selected, setSelected] = useState<Pr | null>(null)
+  const { dismiss, undismiss, isDismissed, prune } = useDismissedComments()
+
+  useEffect(() => {
+    if (!data) return
+    const validIds = new Set<string>()
+    for (const stack of data.stacks) for (const pr of stack.prs) for (const t of pr.unaddressedThreads) validIds.add(t.url)
+    for (const pr of data.standalone) for (const t of pr.unaddressedThreads) validIds.add(t.url)
+    prune(validIds)
+  }, [data, prune])
 
   return (
     <div className="min-h-screen w-full px-6 py-8">
@@ -46,15 +56,17 @@ export default function App() {
       {data && (
         <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
           {data.stacks.map((stack) => (
-            <StackGroup key={`${stack.repo}-${stack.prs[0].number}`} stack={stack} onSelect={setSelected} />
+            <StackGroup key={`${stack.repo}-${stack.prs[0].number}`} stack={stack} onSelect={setSelected} isDismissed={isDismissed} />
           ))}
           {data.standalone.map((pr) => (
-            <PrCard key={`${pr.repo}-${pr.number}`} pr={pr} onSelect={setSelected} />
+            <PrCard key={`${pr.repo}-${pr.number}`} pr={pr} onSelect={setSelected} isDismissed={isDismissed} />
           ))}
         </div>
       )}
 
-      {selected && <PrDetailPanel pr={selected} onClose={() => setSelected(null)} />}
+      {selected && (
+        <PrDetailPanel pr={selected} onClose={() => setSelected(null)} isDismissed={isDismissed} dismiss={dismiss} undismiss={undismiss} />
+      )}
     </div>
   )
 }
