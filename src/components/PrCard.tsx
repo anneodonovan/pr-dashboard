@@ -15,15 +15,18 @@ export function PrCard({
   const ci = CI_LABEL[pr.ciStatus]
   const activeUnaddressed = pr.unaddressedThreads.filter((t) => !isDismissed(t.url))
   const hasUnaddressed = activeUnaddressed.length > 0
+  const needsRebase = pr.staleness === 'needs-rebase'
+
+  const cardTint = hasUnaddressed
+    ? 'border-fuchsia-500/30 bg-fuchsia-500/[0.06] hover:border-fuchsia-500/50'
+    : needsRebase
+      ? 'border-amber-500/30 bg-amber-500/[0.06] hover:border-amber-500/50'
+      : 'border-slate-800 bg-slate-900 hover:border-slate-700'
 
   return (
     <div
       onClick={() => onSelect?.(pr)}
-      className={`cursor-pointer rounded-lg border p-4 transition-colors ${
-        hasUnaddressed
-          ? 'border-fuchsia-500/30 bg-fuchsia-500/[0.06] hover:border-fuchsia-500/50'
-          : 'border-slate-800 bg-slate-900 hover:border-slate-700'
-      }`}
+      className={`cursor-pointer rounded-lg border p-4 transition-colors ${cardTint}`}
     >
       <div className="flex items-start justify-between gap-3">
         <a
