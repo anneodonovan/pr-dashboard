@@ -1,1 +1,4 @@
 @import 'tailwindcss';
+
+/* Manual light/dark toggle: add/remove `.light` on <html>, then use `light:` variants everywhere. */
+@custom-variant light (&:where(.light, .light *));

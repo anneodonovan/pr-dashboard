@@ -31,10 +31,10 @@ export function KanbanBoard({
             key={col.status}
             onClick={() => onToggleCollapse(col.status)}
             title={`Show ${STATUS_LABEL[col.status].label}`}
-            className="flex shrink-0 flex-col items-center gap-2 rounded-lg border border-slate-800 bg-slate-900/60 px-1.5 py-3 hover:border-slate-700"
+            className="flex shrink-0 flex-col items-center gap-2 rounded-lg border border-slate-800 bg-slate-900/60 px-1.5 py-3 hover:border-slate-700 light:border-slate-200 light:bg-white light:hover:border-slate-300"
           >
             <span className={`h-2 w-2 shrink-0 rounded-full ${STATUS_DOT[col.status]}`} />
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-400 [writing-mode:vertical-rl]">
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-400 light:text-slate-600 [writing-mode:vertical-rl]">
               {STATUS_LABEL[col.status].label}
             </span>
             <span className="text-xs text-slate-600">{col.prs.length}</span>
@@ -44,10 +44,10 @@ export function KanbanBoard({
             <button
               onClick={() => onToggleCollapse(col.status)}
               title="Collapse column"
-              className="mb-2 flex w-full items-center gap-2 rounded px-1 py-0.5 hover:bg-slate-800/40"
+              className="mb-2 flex w-full items-center gap-2 rounded px-1 py-0.5 hover:bg-slate-800/40 light:hover:bg-slate-200/60"
             >
               <span className={`h-2 w-2 shrink-0 rounded-full ${STATUS_DOT[col.status]}`} />
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
+              <span className="text-xs font-medium uppercase tracking-wide text-slate-400 light:text-slate-600">
                 {STATUS_LABEL[col.status].label}
               </span>
               <span className="text-xs text-slate-600">{col.prs.length}</span>
@@ -58,7 +58,7 @@ export function KanbanBoard({
                   <PrCard key={`${pr.repo}-${pr.number}`} pr={pr} onSelect={onSelect} isDismissed={isDismissed} />
                 ))
               ) : (
-                <div className="rounded-lg border border-dashed border-slate-800 p-4 text-center text-xs text-slate-600">
+                <div className="rounded-lg border border-dashed border-slate-800 p-4 text-center text-xs text-slate-600 light:border-slate-300">
                   No PRs
                 </div>
               )}

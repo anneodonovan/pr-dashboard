@@ -6,9 +6,9 @@ import { Markdown } from './Markdown'
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-md bg-slate-800/60 px-3 py-2">
+    <div className="rounded-md bg-slate-800/60 px-3 py-2 light:bg-slate-100">
       <div className="text-[10px] uppercase tracking-wide text-slate-500">{label}</div>
-      <div className="text-sm font-medium text-slate-100">{value}</div>
+      <div className="text-sm font-medium text-slate-100 light:text-slate-900">{value}</div>
     </div>
   )
 }
@@ -37,20 +37,20 @@ export function PrDetailPanel({
   return (
     <>
       <div className="fixed inset-0 z-40 bg-black/50" onClick={onClose} />
-      <div className="fixed right-0 top-0 z-50 h-full w-full max-w-3xl overflow-y-auto border-l border-slate-800 bg-slate-900 p-6 shadow-2xl">
+      <div className="fixed right-0 top-0 z-50 h-full w-full max-w-3xl overflow-y-auto border-l border-slate-800 bg-slate-900 p-6 shadow-2xl light:border-slate-200 light:bg-white">
         <div className="flex items-start justify-between gap-3">
           <a
             href={pr.url}
             target="_blank"
             rel="noreferrer"
-            className="text-lg font-semibold text-slate-100 hover:text-sky-400 hover:underline"
+            className="text-lg font-semibold text-slate-100 hover:text-sky-400 light:text-slate-900 light:hover:text-sky-700"
           >
             {pr.title}
           </a>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="shrink-0 rounded-md p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+            className="shrink-0 rounded-md p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-100 light:text-slate-500 light:hover:bg-slate-100 light:hover:text-slate-900"
           >
             ✕
           </button>
@@ -79,7 +79,7 @@ export function PrDetailPanel({
         {pr.body && (
           <div className="mt-5">
             <div className="mb-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">Description</div>
-            <div className="rounded-md bg-slate-800/40 p-3">
+            <div className="rounded-md bg-slate-800/40 p-3 light:bg-slate-100">
               <Markdown>{pr.body}</Markdown>
             </div>
           </div>
@@ -90,8 +90,8 @@ export function PrDetailPanel({
             <div className="mb-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">Reviewers</div>
             <div className="space-y-1.5">
               {pr.reviewers.map((r) => (
-                <div key={r.login} className="flex items-center justify-between rounded-md bg-slate-800/40 px-3 py-1.5">
-                  <span className="text-sm text-slate-200">
+                <div key={r.login} className="flex items-center justify-between rounded-md bg-slate-800/40 px-3 py-1.5 light:bg-slate-100">
+                  <span className="text-sm text-slate-200 light:text-slate-800">
                     {r.name || r.login}
                     {r.name && <span className="ml-1.5 text-xs text-slate-500">@{r.login}</span>}
                   </span>
@@ -114,7 +114,7 @@ export function PrDetailPanel({
                   href={check.url ?? pr.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-2 rounded-md px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800/40"
+                  className="flex items-center gap-2 rounded-md px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800/40 light:text-slate-700 light:hover:bg-slate-100"
                 >
                   <span className={`h-2 w-2 shrink-0 rounded-full ${checkStatusColor(check.status)}`} />
                   <span className="truncate">{check.name}</span>
@@ -126,19 +126,19 @@ export function PrDetailPanel({
 
         {activeThreads.length > 0 && (
           <div className="mt-5">
-            <div className="mb-1.5 text-xs font-medium uppercase tracking-wide text-fuchsia-400">
+            <div className="mb-1.5 text-xs font-medium uppercase tracking-wide text-fuchsia-400 light:text-fuchsia-700">
               Unaddressed comments ({activeThreads.length})
             </div>
             <div className="space-y-2">
               {activeThreads.map((t, i) => (
                 <div key={i} className="rounded-md border border-fuchsia-500/20 bg-fuchsia-500/5 px-3 py-2">
                   <div className="flex items-start justify-between gap-2">
-                    <a href={t.url} target="_blank" rel="noreferrer" className="text-xs font-medium text-fuchsia-400 hover:underline">
+                    <a href={t.url} target="_blank" rel="noreferrer" className="text-xs font-medium text-fuchsia-400 hover:underline light:text-fuchsia-700">
                       {t.author}
                     </a>
                     <button
                       onClick={() => dismiss(t.url)}
-                      className="shrink-0 rounded border border-slate-700 px-1.5 py-0.5 text-[10px] text-slate-400 hover:border-slate-500 hover:text-slate-200"
+                      className="shrink-0 rounded border border-slate-700 px-1.5 py-0.5 text-[10px] text-slate-400 hover:border-slate-500 hover:text-slate-200 light:border-slate-300 light:text-slate-500 light:hover:border-slate-400 light:hover:text-slate-700"
                     >
                       Mark as seen
                     </button>
@@ -146,7 +146,12 @@ export function PrDetailPanel({
                   <div className="mt-1">
                     <Markdown>{t.body}</Markdown>
                   </div>
-                  <a href={t.url} target="_blank" rel="noreferrer" className="mt-1 inline-block text-xs text-fuchsia-400/70 hover:underline">
+                  <a
+                    href={t.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-1 inline-block text-xs text-fuchsia-400/70 hover:underline light:text-fuchsia-700/70"
+                  >
                     View on GitHub &#8599;
                   </a>
                 </div>
@@ -159,21 +164,21 @@ export function PrDetailPanel({
           <div className="mt-5">
             <button
               onClick={() => setShowSeen((v) => !v)}
-              className="text-xs font-medium uppercase tracking-wide text-slate-500 hover:text-slate-300"
+              className="text-xs font-medium uppercase tracking-wide text-slate-500 hover:text-slate-300 light:hover:text-slate-700"
             >
               {showSeen ? 'Hide' : 'Show'} {seenThreads.length} marked as seen
             </button>
             {showSeen && (
               <div className="mt-2 space-y-2">
                 {seenThreads.map((t, i) => (
-                  <div key={i} className="rounded-md border border-slate-800 bg-slate-800/20 px-3 py-2 opacity-60">
+                  <div key={i} className="rounded-md border border-slate-800 bg-slate-800/20 px-3 py-2 opacity-60 light:border-slate-200">
                     <div className="flex items-start justify-between gap-2">
                       <a href={t.url} target="_blank" rel="noreferrer" className="text-xs font-medium text-slate-400 hover:underline">
                         {t.author}
                       </a>
                       <button
                         onClick={() => undismiss(t.url)}
-                        className="shrink-0 rounded border border-slate-700 px-1.5 py-0.5 text-[10px] text-slate-400 hover:border-slate-500 hover:text-slate-200"
+                        className="shrink-0 rounded border border-slate-700 px-1.5 py-0.5 text-[10px] text-slate-400 hover:border-slate-500 hover:text-slate-200 light:border-slate-300 light:hover:border-slate-400 light:hover:text-slate-700"
                       >
                         Undo
                       </button>

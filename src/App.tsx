@@ -4,11 +4,13 @@ import { KanbanBoard } from './components/KanbanBoard'
 import { PrDetailPanel } from './components/PrDetailPanel'
 import { RepoFilter } from './components/RepoFilter'
 import { SortToggle } from './components/SortToggle'
+import { ThemeToggle } from './components/ThemeToggle'
 import { formatRelativeTime } from './lib/formatRelativeTime'
 import { useCollapsedColumns } from './lib/useCollapsedColumns'
 import { useDismissedComments } from './lib/useDismissedComments'
 import { useExcludedRepos } from './lib/useExcludedRepos'
 import { useSortMode } from './lib/useSortMode'
+import { useTheme } from './lib/useTheme'
 import type { Pr } from '../server/types'
 
 export default function App() {
@@ -18,6 +20,7 @@ export default function App() {
   const { excluded: excludedRepos, toggle: toggleRepo } = useExcludedRepos()
   const { mode: sortMode, setMode: setSortMode } = useSortMode()
   const { collapsed: collapsedColumns, toggle: toggleColumn } = useCollapsedColumns()
+  const { theme, toggle: toggleTheme } = useTheme()
 
   useEffect(() => {
     if (!data) return
@@ -38,7 +41,7 @@ export default function App() {
     <div className="min-h-screen w-full px-6 py-8">
       <header className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-slate-100">PR Dashboard</h1>
+          <h1 className="text-xl font-semibold text-slate-100 light:text-slate-900">PR Dashboard</h1>
           {data && (
             <p className="text-sm text-slate-500">
               {data.viewerLogin && `${data.viewerLogin} · `}
@@ -46,17 +49,20 @@ export default function App() {
             </p>
           )}
         </div>
-        <button
-          onClick={refresh}
-          disabled={refreshing}
-          className="rounded-md bg-slate-800 px-3 py-1.5 text-sm font-medium text-slate-200 hover:bg-slate-700 disabled:opacity-50"
-        >
-          {refreshing ? 'Refreshing…' : 'Refresh'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={refresh}
+            disabled={refreshing}
+            className="rounded-md bg-slate-800 px-3 py-1.5 text-sm font-medium text-slate-200 hover:bg-slate-700 disabled:opacity-50 light:bg-slate-100 light:text-slate-700 light:hover:bg-slate-200"
+          >
+            {refreshing ? 'Refreshing…' : 'Refresh'}
+          </button>
+          <ThemeToggle theme={theme} onToggle={toggleTheme} />
+        </div>
       </header>
 
       {data?.error && (
-        <div className="mb-4 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-400">
+        <div className="mb-4 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-400 light:text-amber-700">
           Last refresh failed: {data.error}. Showing the last successful snapshot.
         </div>
       )}

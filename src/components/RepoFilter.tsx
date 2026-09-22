@@ -20,8 +20,8 @@ export function RepoFilter({
             onClick={() => onToggle(repo)}
             className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
               isExcluded
-                ? 'border-slate-800 text-slate-600 hover:border-slate-700 hover:text-slate-400'
-                : 'border-sky-500/40 bg-sky-500/10 text-sky-300'
+                ? 'border-slate-800 text-slate-600 hover:border-slate-700 hover:text-slate-400 light:border-slate-200 light:text-slate-400 light:hover:border-slate-300 light:hover:text-slate-600'
+                : 'border-sky-500/40 bg-sky-500/10 text-sky-300 light:text-sky-700'
             }`}
           >
             {repo.split('/')[1]} <span className="opacity-60">{count}</span>

@@ -15,13 +15,16 @@ export function PrCard({
   const ci = CI_LABEL[pr.ciStatus]
   const activeUnaddressed = pr.unaddressedThreads.filter((t) => !isDismissed(t.url))
   const hasUnaddressed = activeUnaddressed.length > 0
+  const hasConflicts = pr.staleness === 'conflicts'
   const needsRebase = pr.staleness === 'needs-rebase'
 
   const cardTint = hasUnaddressed
     ? 'border-fuchsia-500/30 bg-fuchsia-500/[0.06] hover:border-fuchsia-500/50'
-    : needsRebase
-      ? 'border-amber-500/30 bg-amber-500/[0.06] hover:border-amber-500/50'
-      : 'border-slate-800 bg-slate-900 hover:border-slate-700'
+    : hasConflicts
+      ? 'border-red-500/30 bg-red-500/[0.06] hover:border-red-500/50'
+      : needsRebase
+        ? 'border-amber-500/30 bg-amber-500/[0.06] hover:border-amber-500/50'
+        : 'border-slate-800 bg-slate-900 hover:border-slate-700 light:border-slate-200 light:bg-white light:hover:border-slate-300'
 
   return (
     <div
@@ -34,7 +37,7 @@ export function PrCard({
           target="_blank"
           rel="noreferrer"
           onClick={(e) => e.stopPropagation()}
-          className="font-medium text-slate-100 hover:text-sky-400 hover:underline"
+          className="font-medium text-slate-100 hover:text-sky-400 light:text-slate-900 light:hover:text-sky-700"
         >
           {pr.title}
         </a>
@@ -51,7 +54,7 @@ export function PrCard({
         {pr.stack && (
           <span
             title={`Stack: ${pr.stack.prNumbers.map((n) => `#${n}`).join(' → ')}`}
-            className="rounded bg-indigo-500/15 px-1.5 py-0.5 font-medium text-indigo-300"
+            className="rounded bg-indigo-500/15 px-1.5 py-0.5 font-medium text-indigo-300 light:text-indigo-700"
           >
             stack {pr.stack.position}/{pr.stack.total}
           </span>
@@ -64,7 +67,7 @@ export function PrCard({
         {activeUnaddressed.length > 0 && (
           <span
             title={activeUnaddressed.map((t) => `${t.author}: ${t.body.slice(0, 140)}`).join('\n\n')}
-            className="rounded bg-fuchsia-500/15 px-2 py-1 text-xs font-medium text-fuchsia-400"
+            className="rounded bg-fuchsia-500/15 px-2 py-1 text-xs font-medium text-fuchsia-400 light:text-fuchsia-700"
           >
             {activeUnaddressed.length} unaddressed
           </span>
