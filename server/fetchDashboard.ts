@@ -1,6 +1,16 @@
 import { ghGraphQL, ghJson, getViewerLogin } from './github'
 import { buildStacks } from './buildStacks'
-import type { CiStatus, DashboardData, Pr, ReviewState, Reviewer, Staleness, UnaddressedThread } from './types'
+import type {
+  CheckItem,
+  CiStatus,
+  DashboardData,
+  Pr,
+  PrStatus,
+  ReviewState,
+  Reviewer,
+  Staleness,
+  UnaddressedThread,
+} from './types'
 
 interface SearchResultItem {
   repository: { nameWithOwner: string }
@@ -12,21 +22,44 @@ const PR_DETAIL_QUERY = `
     repository(owner: $owner, name: $repo) {
       pullRequest(number: $number) {
         title
+        body
         url
         isDraft
+        createdAt
         headRefName
         baseRefName
         mergeStateStatus
         reviewDecision
         updatedAt
+        additions
+        deletions
+        changedFiles
+        commits(last: 1) {
+          totalCount
+          nodes {
+            commit {
+              statusCheckRollup {
+                state
+                contexts(first: 30) {
+                  nodes {
+                    __typename
+                    ... on CheckRun { name conclusion status detailsUrl }
+                    ... on StatusContext { context state targetUrl }
+                  }
+                }
+              }
+            }
+          }
+        }
+        comments { totalCount }
         latestReviews(first: 30) {
-          nodes { author { login } state submittedAt }
+          nodes { author { login ... on User { name } } state submittedAt }
         }
         reviewRequests(first: 30) {
           nodes {
             requestedReviewer {
               __typename
-              ... on User { login }
+              ... on User { login name }
               ... on Team { name }
             }
           }
@@ -39,9 +72,6 @@ const PR_DETAIL_QUERY = `
             }
           }
         }
-        commits(last: 1) {
-          nodes { commit { statusCheckRollup { state } } }
-        }
       }
     }
   }
@@ -52,21 +82,41 @@ interface RawReviewThread {
   comments: { nodes: Array<{ author: { login: string } | null; body: string; url: string }> }
 }
 
+interface RawCheckContext {
+  __typename: 'CheckRun' | 'StatusContext'
+  name?: string
+  conclusion?: string | null
+  status?: string
+  detailsUrl?: string
+  context?: string
+  state?: string
+  targetUrl?: string
+}
+
 interface RawPrDetail {
   repository: {
     pullRequest: {
       title: string
+      body: string
       url: string
       isDraft: boolean
+      createdAt: string
       headRefName: string
       baseRefName: string
       mergeStateStatus: string
       reviewDecision: string | null
       updatedAt: string
-      latestReviews: { nodes: Array<{ author: { login: string } | null; state: string; submittedAt: string }> }
-      reviewRequests: { nodes: Array<{ requestedReviewer: { login?: string; name?: string } | null }> }
+      additions: number
+      deletions: number
+      changedFiles: number
+      commits: {
+        totalCount: number
+        nodes: Array<{ commit: { statusCheckRollup: { state: string; contexts: { nodes: RawCheckContext[] } } | null } }>
+      }
+      comments: { totalCount: number }
+      latestReviews: { nodes: Array<{ author: { login: string; name?: string | null } | null; state: string; submittedAt: string }> }
+      reviewRequests: { nodes: Array<{ requestedReviewer: { login?: string; name?: string | null } | null }> }
       reviewThreads: { nodes: RawReviewThread[] }
-      commits: { nodes: Array<{ commit: { statusCheckRollup: { state: string } | null } }> }
     } | null
   } | null
 }
@@ -98,6 +148,15 @@ function mapReviewState(state: string): ReviewState | null {
   }
 }
 
+function mapChecks(contexts: RawCheckContext[]): CheckItem[] {
+  return contexts.map((ctx) => {
+    if (ctx.__typename === 'CheckRun') {
+      return { name: ctx.name ?? 'check', status: (ctx.conclusion ?? ctx.status ?? 'pending').toLowerCase(), url: ctx.detailsUrl ?? null }
+    }
+    return { name: ctx.context ?? 'status', status: (ctx.state ?? 'pending').toLowerCase(), url: ctx.targetUrl ?? null }
+  })
+}
+
 type RawPr = NonNullable<NonNullable<RawPrDetail['repository']>['pullRequest']>
 
 function deriveReviewers(detail: RawPr): Reviewer[] {
@@ -106,14 +165,14 @@ function deriveReviewers(detail: RawPr): Reviewer[] {
   for (const req of detail.reviewRequests.nodes) {
     const login = req.requestedReviewer?.login ?? req.requestedReviewer?.name
     if (!login) continue
-    byLogin.set(login, { login, state: 'pending', submittedAt: null })
+    byLogin.set(login, { login, name: req.requestedReviewer?.name ?? null, state: 'pending', submittedAt: null })
   }
 
   for (const review of detail.latestReviews.nodes) {
     const login = review.author?.login
     const state = mapReviewState(review.state)
     if (!login || !state) continue
-    byLogin.set(login, { login, state, submittedAt: review.submittedAt })
+    byLogin.set(login, { login, name: review.author?.name ?? null, state, submittedAt: review.submittedAt })
   }
 
   return Array.from(byLogin.values())
@@ -136,26 +195,53 @@ function deriveUnaddressedThreads(threads: RawReviewThread[], viewerLogin: strin
   return unaddressed
 }
 
+function deriveStatus(pr: {
+  isDraft: boolean
+  reviewers: Reviewer[]
+  reviewDecision: string | null
+  mergeStateStatus: string
+}): PrStatus {
+  if (pr.isDraft) return 'draft'
+  if (pr.reviewers.length === 0) return 'no-reviewer'
+  if (pr.reviewDecision === 'CHANGES_REQUESTED') return 'changes-requested'
+  if (pr.reviewDecision === 'APPROVED') {
+    return pr.mergeStateStatus === 'CLEAN' ? 'ready-to-merge' : 'approved'
+  }
+  return 'waiting-for-approval'
+}
+
 async function fetchPrDetail(nameWithOwner: string, number: number, viewerLogin: string): Promise<Pr> {
   const [owner, repo] = nameWithOwner.split('/')
   const data = await ghGraphQL<RawPrDetail>(PR_DETAIL_QUERY, { owner, repo, number })
   const pr = data.repository?.pullRequest
   if (!pr) throw new Error(`${nameWithOwner}#${number} not found`)
 
+  const reviewers = deriveReviewers(pr)
+  const rollup = pr.commits.nodes[0]?.commit.statusCheckRollup
+
   return {
     repo: nameWithOwner,
     number,
     title: pr.title,
+    body: pr.body,
     url: pr.url,
     isDraft: pr.isDraft,
+    createdAt: pr.createdAt,
     updatedAt: pr.updatedAt,
     headRefName: pr.headRefName,
     baseRefName: pr.baseRefName,
-    ciStatus: mapCiStatus(pr.commits.nodes[0]?.commit.statusCheckRollup?.state),
+    status: deriveStatus({ isDraft: pr.isDraft, reviewers, reviewDecision: pr.reviewDecision, mergeStateStatus: pr.mergeStateStatus }),
+    ciStatus: mapCiStatus(rollup?.state),
+    checks: mapChecks(rollup?.contexts.nodes ?? []),
     staleness: mapStaleness(pr.mergeStateStatus),
     reviewDecision: pr.reviewDecision,
-    reviewers: deriveReviewers(pr),
+    reviewers,
     unaddressedThreads: deriveUnaddressedThreads(pr.reviewThreads.nodes, viewerLogin),
+    additions: pr.additions,
+    deletions: pr.deletions,
+    changedFiles: pr.changedFiles,
+    commitsCount: pr.commits.totalCount,
+    commentsCount: pr.comments.totalCount,
   }
 }
 

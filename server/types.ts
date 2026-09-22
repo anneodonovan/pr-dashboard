@@ -4,33 +4,59 @@ export type Staleness = 'up-to-date' | 'needs-rebase' | 'conflicts'
 
 export type ReviewState = 'approved' | 'changes-requested' | 'commented' | 'pending'
 
+/** A single, primary "where does this PR stand" label, most useful signal wins. */
+export type PrStatus =
+  | 'draft'
+  | 'no-reviewer'
+  | 'changes-requested'
+  | 'waiting-for-approval'
+  | 'approved'
+  | 'ready-to-merge'
+
 export interface Reviewer {
   login: string
+  name: string | null
   state: ReviewState
   submittedAt: string | null
 }
 
 export interface UnaddressedThread {
-  /** First ~120 chars of the thread's opening comment, for a hover preview. */
+  /** First ~140 chars of the outstanding comment, for a preview. */
   preview: string
   author: string
   url: string
+}
+
+export interface CheckItem {
+  name: string
+  /** Lowercased conclusion/state, e.g. 'success', 'failure', 'in_progress'. */
+  status: string
+  url: string | null
 }
 
 export interface Pr {
   repo: string
   number: number
   title: string
+  body: string
   url: string
   isDraft: boolean
+  createdAt: string
   updatedAt: string
   headRefName: string
   baseRefName: string
+  status: PrStatus
   ciStatus: CiStatus
+  checks: CheckItem[]
   staleness: Staleness
   reviewDecision: string | null
   reviewers: Reviewer[]
   unaddressedThreads: UnaddressedThread[]
+  additions: number
+  deletions: number
+  changedFiles: number
+  commitsCount: number
+  commentsCount: number
 }
 
 export interface PrStack {

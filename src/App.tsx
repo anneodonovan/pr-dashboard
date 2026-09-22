@@ -1,13 +1,17 @@
+import { useState } from 'react'
 import { usePrDashboard } from './api/dashboard'
 import { PrCard } from './components/PrCard'
+import { PrDetailPanel } from './components/PrDetailPanel'
 import { StackGroup } from './components/StackGroup'
 import { formatRelativeTime } from './lib/formatRelativeTime'
+import type { Pr } from '../server/types'
 
 export default function App() {
   const { data, loading, refreshing, refresh } = usePrDashboard()
+  const [selected, setSelected] = useState<Pr | null>(null)
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
+    <div className="min-h-screen w-full px-6 py-8">
       <header className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-slate-100">PR Dashboard</h1>
@@ -40,15 +44,17 @@ export default function App() {
       )}
 
       {data && (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
           {data.stacks.map((stack) => (
-            <StackGroup key={`${stack.repo}-${stack.prs[0].number}`} stack={stack} />
+            <StackGroup key={`${stack.repo}-${stack.prs[0].number}`} stack={stack} onSelect={setSelected} />
           ))}
           {data.standalone.map((pr) => (
-            <PrCard key={`${pr.repo}-${pr.number}`} pr={pr} />
+            <PrCard key={`${pr.repo}-${pr.number}`} pr={pr} onSelect={setSelected} />
           ))}
         </div>
       )}
+
+      {selected && <PrDetailPanel pr={selected} onClose={() => setSelected(null)} />}
     </div>
   )
 }
