@@ -34,6 +34,14 @@ export interface CheckItem {
   url: string | null
 }
 
+export interface StackMembership {
+  /** 1-based position, base of the stack first. */
+  position: number
+  total: number
+  /** PR numbers in the stack, base first, in order. */
+  prNumbers: number[]
+}
+
 export interface Pr {
   repo: string
   number: number
@@ -57,19 +65,14 @@ export interface Pr {
   changedFiles: number
   commitsCount: number
   commentsCount: number
-}
-
-export interface PrStack {
-  repo: string
-  /** PRs ordered base -> top of stack. */
-  prs: Pr[]
+  /** Non-null when this PR is base-branch-chained to another open PR. */
+  stack: StackMembership | null
 }
 
 export interface DashboardData {
   viewerLogin: string
   fetchedAt: string
-  stacks: PrStack[]
-  standalone: Pr[]
+  prs: Pr[]
   /** Set when the last refresh attempt failed; the data shown is the last good snapshot. */
   error: string | null
 }

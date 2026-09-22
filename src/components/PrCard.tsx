@@ -1,6 +1,6 @@
 import type { Pr } from '../../server/types'
 import { formatRelativeTime } from '../lib/formatRelativeTime'
-import { CI_LABEL, REVIEW_CHIP, STALENESS_LABEL, STATUS_LABEL } from '../lib/labels'
+import { CI_LABEL, REVIEW_CHIP, STALENESS_LABEL } from '../lib/labels'
 
 export function PrCard({
   pr,
@@ -13,7 +13,6 @@ export function PrCard({
 }) {
   const staleness = STALENESS_LABEL[pr.staleness]
   const ci = CI_LABEL[pr.ciStatus]
-  const status = STATUS_LABEL[pr.status]
   const activeUnaddressed = pr.unaddressedThreads.filter((t) => !isDismissed(t.url))
 
   return (
@@ -34,17 +33,24 @@ export function PrCard({
         <span className="whitespace-nowrap text-xs text-slate-500">{formatRelativeTime(pr.updatedAt)}</span>
       </div>
 
-      <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
+      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
         <span>
           {pr.repo.split('/')[1]} #{pr.number}
         </span>
         <span className="font-mono">
           <span className="text-emerald-500">+{pr.additions}</span> <span className="text-red-500">-{pr.deletions}</span>
         </span>
+        {pr.stack && (
+          <span
+            title={`Stack: ${pr.stack.prNumbers.map((n) => `#${n}`).join(' → ')}`}
+            className="rounded bg-indigo-500/15 px-1.5 py-0.5 font-medium text-indigo-300"
+          >
+            stack {pr.stack.position}/{pr.stack.total}
+          </span>
+        )}
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <span className={`rounded px-2 py-1 text-xs font-medium ${status.className}`}>{status.label}</span>
         <span className={`rounded px-2 py-1 text-xs font-medium ${ci.className}`}>{ci.label}</span>
         {staleness && <span className={`rounded px-2 py-1 text-xs font-medium ${staleness.className}`}>{staleness.label}</span>}
         {activeUnaddressed.length > 0 && (

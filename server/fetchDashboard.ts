@@ -1,5 +1,5 @@
 import { ghGraphQL, ghJson, getViewerLogin } from './github'
-import { buildStacks } from './buildStacks'
+import { annotateStacks } from './buildStacks'
 import type {
   CheckItem,
   CiStatus,
@@ -269,6 +269,7 @@ async function fetchPrDetail(nameWithOwner: string, number: number, viewerLogin:
     changedFiles: pr.changedFiles,
     commitsCount: pr.commits.totalCount,
     commentsCount: pr.comments.totalCount,
+    stack: null,
   }
 }
 
@@ -290,13 +291,12 @@ export async function fetchDashboard(): Promise<DashboardData> {
     results.map((r) => fetchPrDetail(r.repository.nameWithOwner, r.number, viewerLogin)),
   )
 
-  const { stacks, standalone } = buildStacks(prs)
+  annotateStacks(prs)
 
   return {
     viewerLogin,
     fetchedAt: new Date().toISOString(),
-    stacks,
-    standalone,
+    prs,
     error: null,
   }
 }

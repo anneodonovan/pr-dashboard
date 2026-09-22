@@ -18,7 +18,7 @@ export function prDashboardPlugin(): Plugin {
       if (cache) {
         cache = { ...cache, error: message }
       } else {
-        cache = { viewerLogin: '', fetchedAt: new Date().toISOString(), stacks: [], standalone: [], error: message }
+        cache = { viewerLogin: '', fetchedAt: new Date().toISOString(), prs: [], error: message }
       }
       console.error('[pr-dashboard] refresh failed:', message)
     } finally {
@@ -41,8 +41,7 @@ export function prDashboardPlugin(): Plugin {
         const body: DashboardData = cache ?? {
           viewerLogin: '',
           fetchedAt: new Date().toISOString(),
-          stacks: [],
-          standalone: [],
+          prs: [],
           error: 'Still loading initial data…',
         }
         res.end(JSON.stringify(body))

@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { usePrDashboard } from './api/dashboard'
-import { PrCard } from './components/PrCard'
+import { KanbanBoard } from './components/KanbanBoard'
 import { PrDetailPanel } from './components/PrDetailPanel'
-import { StackGroup } from './components/StackGroup'
 import { formatRelativeTime } from './lib/formatRelativeTime'
 import { useDismissedComments } from './lib/useDismissedComments'
 import type { Pr } from '../server/types'
@@ -15,8 +14,7 @@ export default function App() {
   useEffect(() => {
     if (!data) return
     const validIds = new Set<string>()
-    for (const stack of data.stacks) for (const pr of stack.prs) for (const t of pr.unaddressedThreads) validIds.add(t.url)
-    for (const pr of data.standalone) for (const t of pr.unaddressedThreads) validIds.add(t.url)
+    for (const pr of data.prs) for (const t of pr.unaddressedThreads) validIds.add(t.url)
     prune(validIds)
   }, [data, prune])
 
@@ -49,20 +47,9 @@ export default function App() {
 
       {loading && !data && <p className="text-slate-500">Loading…</p>}
 
-      {data && data.stacks.length === 0 && data.standalone.length === 0 && (
-        <p className="text-slate-500">No open PRs found.</p>
-      )}
+      {data && data.prs.length === 0 && <p className="text-slate-500">No open PRs found.</p>}
 
-      {data && (
-        <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {data.stacks.map((stack) => (
-            <StackGroup key={`${stack.repo}-${stack.prs[0].number}`} stack={stack} onSelect={setSelected} isDismissed={isDismissed} />
-          ))}
-          {data.standalone.map((pr) => (
-            <PrCard key={`${pr.repo}-${pr.number}`} pr={pr} onSelect={setSelected} isDismissed={isDismissed} />
-          ))}
-        </div>
-      )}
+      {data && data.prs.length > 0 && <KanbanBoard prs={data.prs} onSelect={setSelected} isDismissed={isDismissed} />}
 
       {selected && (
         <PrDetailPanel pr={selected} onClose={() => setSelected(null)} isDismissed={isDismissed} dismiss={dismiss} undismiss={undismiss} />

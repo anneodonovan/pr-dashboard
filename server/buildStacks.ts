@@ -1,12 +1,13 @@
-import type { Pr, PrStack } from './types'
+import type { Pr } from './types'
 
 /**
- * Groups PRs into stacks by walking base-branch -> head-branch chains within
- * each repo. A PR whose baseRefName doesn't match another PR's headRefName
- * (i.e. it's based on the default branch, or on a branch we don't have an
- * open PR for) is a chain root; single-PR "chains" are standalone.
+ * Annotates each PR's `.stack` field by walking base-branch -> head-branch
+ * chains within each repo. A PR whose baseRefName doesn't match another PR's
+ * headRefName (i.e. it's based on the default branch, or on a branch we
+ * don't have an open PR for) is a chain root; single-PR "chains" are left
+ * as standalone (stack: null).
  */
-export function buildStacks(prs: Pr[]): { stacks: PrStack[]; standalone: Pr[] } {
+export function annotateStacks(prs: Pr[]): void {
   const byRepo = new Map<string, Pr[]>()
   for (const pr of prs) {
     const list = byRepo.get(pr.repo) ?? []
@@ -14,10 +15,7 @@ export function buildStacks(prs: Pr[]): { stacks: PrStack[]; standalone: Pr[] } 
     byRepo.set(pr.repo, list)
   }
 
-  const stacks: PrStack[] = []
-  const standalone: Pr[] = []
-
-  for (const [repo, repoPrs] of byRepo) {
+  for (const repoPrs of byRepo.values()) {
     const byHeadRef = new Map(repoPrs.map((pr) => [pr.headRefName, pr]))
     const childrenByBaseRef = new Map<string, Pr[]>()
     for (const pr of repoPrs) {
@@ -38,12 +36,11 @@ export function buildStacks(prs: Pr[]): { stacks: PrStack[]; standalone: Pr[] } 
       walk(root)
 
       if (chain.length > 1) {
-        stacks.push({ repo, prs: chain })
-      } else {
-        standalone.push(root)
+        const prNumbers = chain.map((pr) => pr.number)
+        chain.forEach((pr, i) => {
+          pr.stack = { position: i + 1, total: chain.length, prNumbers }
+        })
       }
     }
   }
-
-  return { stacks, standalone }
 }

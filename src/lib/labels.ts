@@ -9,6 +9,25 @@ export const STATUS_LABEL: Record<PrStatus, { label: string; className: string }
   'ready-to-merge': { label: 'Ready to merge', className: 'bg-emerald-500/25 text-emerald-300' },
 }
 
+/** Kanban column order — roughly the lifecycle of a PR. */
+export const STATUS_ORDER: PrStatus[] = [
+  'draft',
+  'no-reviewer',
+  'waiting-for-approval',
+  'changes-requested',
+  'approved',
+  'ready-to-merge',
+]
+
+export const STATUS_DOT: Record<PrStatus, string> = {
+  draft: 'bg-slate-400',
+  'no-reviewer': 'bg-slate-400',
+  'changes-requested': 'bg-red-400',
+  'waiting-for-approval': 'bg-amber-400',
+  approved: 'bg-emerald-400',
+  'ready-to-merge': 'bg-emerald-300',
+}
+
 export const CI_LABEL: Record<CiStatus, { label: string; className: string }> = {
   success: { label: 'CI passing', className: 'bg-emerald-500/15 text-emerald-400' },
   failure: { label: 'CI failing', className: 'bg-red-500/15 text-red-400' },
