@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { usePrDashboard } from './api/dashboard'
 import { KanbanBoard } from './components/KanbanBoard'
 import { PrDetailPanel } from './components/PrDetailPanel'
+import { RepoFilter } from './components/RepoFilter'
 import { formatRelativeTime } from './lib/formatRelativeTime'
 import { useDismissedComments } from './lib/useDismissedComments'
 import type { Pr } from '../server/types'
@@ -10,6 +11,7 @@ export default function App() {
   const { data, loading, refreshing, refresh } = usePrDashboard()
   const [selected, setSelected] = useState<Pr | null>(null)
   const { dismiss, undismiss, isDismissed, prune } = useDismissedComments()
+  const [excludedRepos, setExcludedRepos] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     if (!data) return
@@ -17,6 +19,23 @@ export default function App() {
     for (const pr of data.prs) for (const t of pr.unaddressedThreads) validIds.add(t.url)
     prune(validIds)
   }, [data, prune])
+
+  const repoCounts = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const pr of data?.prs ?? []) counts.set(pr.repo, (counts.get(pr.repo) ?? 0) + 1)
+    return [...counts.entries()].map(([repo, count]) => ({ repo, count })).sort((a, b) => a.repo.localeCompare(b.repo))
+  }, [data])
+
+  const toggleRepo = (repo: string) => {
+    setExcludedRepos((prev) => {
+      const next = new Set(prev)
+      if (next.has(repo)) next.delete(repo)
+      else next.add(repo)
+      return next
+    })
+  }
+
+  const visiblePrs = data?.prs.filter((pr) => !excludedRepos.has(pr.repo)) ?? []
 
   return (
     <div className="min-h-screen w-full px-6 py-8">
@@ -49,7 +68,16 @@ export default function App() {
 
       {data && data.prs.length === 0 && <p className="text-slate-500">No open PRs found.</p>}
 
-      {data && data.prs.length > 0 && <KanbanBoard prs={data.prs} onSelect={setSelected} isDismissed={isDismissed} />}
+      {data && data.prs.length > 0 && (
+        <>
+          <RepoFilter repos={repoCounts} excluded={excludedRepos} onToggle={toggleRepo} />
+          {visiblePrs.length > 0 ? (
+            <KanbanBoard prs={visiblePrs} onSelect={setSelected} isDismissed={isDismissed} />
+          ) : (
+            <p className="text-slate-500">No PRs match the selected repos.</p>
+          )}
+        </>
+      )}
 
       {selected && (
         <PrDetailPanel pr={selected} onClose={() => setSelected(null)} isDismissed={isDismissed} dismiss={dismiss} undismiss={undismiss} />

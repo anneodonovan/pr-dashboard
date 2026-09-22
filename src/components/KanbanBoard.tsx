@@ -21,7 +21,7 @@ export function KanbanBoard({
   return (
     <div className="flex items-start gap-4 overflow-x-auto pb-4">
       {columns.map((col) => (
-        <div key={col.status} className="w-80 shrink-0">
+        <div key={col.status} className="min-w-[280px] flex-1">
           <div className="mb-2 flex items-center gap-2 px-1">
             <span className={`h-2 w-2 rounded-full ${STATUS_DOT[col.status]}`} />
             <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
