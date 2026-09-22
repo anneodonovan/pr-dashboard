@@ -10,7 +10,7 @@ export function RepoFilter({
   if (repos.length < 2) return null
 
   return (
-    <div className="mb-4 flex flex-wrap items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Repos</span>
       {repos.map(({ repo, count }) => {
         const isExcluded = excluded.has(repo)

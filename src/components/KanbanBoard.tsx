@@ -1,21 +1,22 @@
 import type { Pr } from '../../server/types'
 import { STATUS_DOT, STATUS_LABEL, STATUS_ORDER } from '../lib/labels'
+import { sortPrs, type SortMode } from '../lib/sortPrs'
 import { PrCard } from './PrCard'
 
 export function KanbanBoard({
   prs,
   onSelect,
   isDismissed,
+  sortMode,
 }: {
   prs: Pr[]
   onSelect: (pr: Pr) => void
   isDismissed: (url: string) => boolean
+  sortMode: SortMode
 }) {
   const columns = STATUS_ORDER.map((status) => ({
     status,
-    prs: prs
-      .filter((pr) => pr.status === status)
-      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()),
+    prs: sortPrs(prs.filter((pr) => pr.status === status), sortMode),
   }))
 
   return (

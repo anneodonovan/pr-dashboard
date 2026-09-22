@@ -2,7 +2,7 @@ import type { CiStatus, PrStatus, ReviewState, Staleness } from '../../server/ty
 
 export const STATUS_LABEL: Record<PrStatus, { label: string; className: string }> = {
   draft: { label: 'Draft', className: 'bg-slate-700/50 text-slate-300' },
-  'no-reviewer': { label: 'No reviewer assigned', className: 'bg-slate-600/30 text-slate-300' },
+  'no-reviewer': { label: 'No reviewer assigned', className: 'bg-orange-500/15 text-orange-400' },
   'changes-requested': { label: 'Changes requested', className: 'bg-red-500/15 text-red-400' },
   'waiting-for-approval': { label: 'Waiting for approval', className: 'bg-amber-500/15 text-amber-400' },
   approved: { label: 'Approved', className: 'bg-emerald-500/15 text-emerald-400' },
@@ -21,7 +21,7 @@ export const STATUS_ORDER: PrStatus[] = [
 
 export const STATUS_DOT: Record<PrStatus, string> = {
   draft: 'bg-slate-400',
-  'no-reviewer': 'bg-slate-400',
+  'no-reviewer': 'bg-orange-400',
   'changes-requested': 'bg-red-400',
   'waiting-for-approval': 'bg-amber-400',
   approved: 'bg-emerald-400',

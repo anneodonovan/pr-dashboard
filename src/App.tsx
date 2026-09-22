@@ -3,9 +3,11 @@ import { usePrDashboard } from './api/dashboard'
 import { KanbanBoard } from './components/KanbanBoard'
 import { PrDetailPanel } from './components/PrDetailPanel'
 import { RepoFilter } from './components/RepoFilter'
+import { SortToggle } from './components/SortToggle'
 import { formatRelativeTime } from './lib/formatRelativeTime'
 import { useDismissedComments } from './lib/useDismissedComments'
 import { useExcludedRepos } from './lib/useExcludedRepos'
+import { useSortMode } from './lib/useSortMode'
 import type { Pr } from '../server/types'
 
 export default function App() {
@@ -13,6 +15,7 @@ export default function App() {
   const [selected, setSelected] = useState<Pr | null>(null)
   const { dismiss, undismiss, isDismissed, prune } = useDismissedComments()
   const { excluded: excludedRepos, toggle: toggleRepo } = useExcludedRepos()
+  const { mode: sortMode, setMode: setSortMode } = useSortMode()
 
   useEffect(() => {
     if (!data) return
@@ -62,9 +65,12 @@ export default function App() {
 
       {data && data.prs.length > 0 && (
         <>
-          <RepoFilter repos={repoCounts} excluded={excludedRepos} onToggle={toggleRepo} />
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <RepoFilter repos={repoCounts} excluded={excludedRepos} onToggle={toggleRepo} />
+            <SortToggle mode={sortMode} onChange={setSortMode} />
+          </div>
           {visiblePrs.length > 0 ? (
-            <KanbanBoard prs={visiblePrs} onSelect={setSelected} isDismissed={isDismissed} />
+            <KanbanBoard prs={visiblePrs} onSelect={setSelected} isDismissed={isDismissed} sortMode={sortMode} />
           ) : (
             <p className="text-slate-500">No PRs match the selected repos.</p>
           )}
