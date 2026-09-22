@@ -1,0 +1,36 @@
+# PR Dashboard
+
+A personal dashboard for tracking your own open GitHub PRs: which stack
+they're in, who's reviewed them, which review comments you haven't replied
+to, and whether they're stale and need a rebase.
+
+Not affiliated with or part of any org repo — standalone local tool.
+
+## Requirements
+
+- `gh` CLI, authenticated (`gh auth status`)
+- `bun`
+
+## Usage
+
+```bash
+bun install
+bun run dev
+```
+
+Open the printed local URL. Data refreshes automatically every 60s, or click
+**Refresh** for an immediate update. All GitHub data is fetched server-side
+(in a Vite dev-server middleware) by shelling out to `gh`, so nothing beyond
+the local dev server is required.
+
+## How it works
+
+- `server/fetchDashboard.ts` discovers your open PRs (`gh search prs
+  --author=@me`) across every repo you have access to, then fetches full
+  detail per PR via `gh api graphql`.
+- Stacks are detected by chaining `baseRefName` -> `headRefName` within a
+  repo — no manual tagging needed.
+- A review thread counts as "unaddressed" if it's unresolved on GitHub *and*
+  your reply isn't the last comment in it.
+- Staleness ("Needs rebase" / "Conflicts") comes from GitHub's own
+  `mergeStateStatus`.
