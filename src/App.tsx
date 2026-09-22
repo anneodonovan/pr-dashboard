@@ -5,12 +5,14 @@ import { PrDetailPanel } from './components/PrDetailPanel'
 import { RepoFilter } from './components/RepoFilter'
 import { SortToggle } from './components/SortToggle'
 import { ThemeToggle } from './components/ThemeToggle'
+import { UnaddressedToggle } from './components/UnaddressedToggle'
 import { formatRelativeTime } from './lib/formatRelativeTime'
 import { useCollapsedColumns } from './lib/useCollapsedColumns'
 import { useDismissedComments } from './lib/useDismissedComments'
 import { useExcludedRepos } from './lib/useExcludedRepos'
 import { useSortMode } from './lib/useSortMode'
 import { useTheme } from './lib/useTheme'
+import { useUnaddressedOnly } from './lib/useUnaddressedOnly'
 import type { Pr } from '../server/types'
 
 export default function App() {
@@ -21,6 +23,7 @@ export default function App() {
   const { mode: sortMode, setMode: setSortMode } = useSortMode()
   const { collapsed: collapsedColumns, toggle: toggleColumn } = useCollapsedColumns()
   const { theme, toggle: toggleTheme } = useTheme()
+  const { enabled: unaddressedOnly, toggle: toggleUnaddressedOnly } = useUnaddressedOnly()
 
   useEffect(() => {
     if (!data) return
@@ -35,7 +38,9 @@ export default function App() {
     return [...counts.entries()].map(([repo, count]) => ({ repo, count })).sort((a, b) => a.repo.localeCompare(b.repo))
   }, [data])
 
-  const visiblePrs = data?.prs.filter((pr) => !excludedRepos.has(pr.repo)) ?? []
+  const visiblePrs = (data?.prs.filter((pr) => !excludedRepos.has(pr.repo)) ?? []).filter(
+    (pr) => !unaddressedOnly || pr.unaddressedThreads.some((t) => !isDismissed(t.url)),
+  )
 
   return (
     <div className="min-h-screen w-full px-6 py-8">
@@ -74,7 +79,10 @@ export default function App() {
       {data && data.prs.length > 0 && (
         <>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <RepoFilter repos={repoCounts} excluded={excludedRepos} onToggle={toggleRepo} />
+            <div className="flex flex-wrap items-center gap-3">
+              <RepoFilter repos={repoCounts} excluded={excludedRepos} onToggle={toggleRepo} />
+              <UnaddressedToggle enabled={unaddressedOnly} onToggle={toggleUnaddressedOnly} />
+            </div>
             <SortToggle mode={sortMode} onChange={setSortMode} />
           </div>
           {visiblePrs.length > 0 ? (
@@ -87,7 +95,7 @@ export default function App() {
               onToggleCollapse={toggleColumn}
             />
           ) : (
-            <p className="text-slate-500">No PRs match the selected repos.</p>
+            <p className="text-slate-500">No PRs match the current filters.</p>
           )}
         </>
       )}
