@@ -5,13 +5,14 @@ import { PrDetailPanel } from './components/PrDetailPanel'
 import { RepoFilter } from './components/RepoFilter'
 import { formatRelativeTime } from './lib/formatRelativeTime'
 import { useDismissedComments } from './lib/useDismissedComments'
+import { useExcludedRepos } from './lib/useExcludedRepos'
 import type { Pr } from '../server/types'
 
 export default function App() {
   const { data, loading, refreshing, refresh } = usePrDashboard()
   const [selected, setSelected] = useState<Pr | null>(null)
   const { dismiss, undismiss, isDismissed, prune } = useDismissedComments()
-  const [excludedRepos, setExcludedRepos] = useState<Set<string>>(new Set())
+  const { excluded: excludedRepos, toggle: toggleRepo } = useExcludedRepos()
 
   useEffect(() => {
     if (!data) return
@@ -25,15 +26,6 @@ export default function App() {
     for (const pr of data?.prs ?? []) counts.set(pr.repo, (counts.get(pr.repo) ?? 0) + 1)
     return [...counts.entries()].map(([repo, count]) => ({ repo, count })).sort((a, b) => a.repo.localeCompare(b.repo))
   }, [data])
-
-  const toggleRepo = (repo: string) => {
-    setExcludedRepos((prev) => {
-      const next = new Set(prev)
-      if (next.has(repo)) next.delete(repo)
-      else next.add(repo)
-      return next
-    })
-  }
 
   const visiblePrs = data?.prs.filter((pr) => !excludedRepos.has(pr.repo)) ?? []
 

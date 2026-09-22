@@ -16,7 +16,7 @@ export function KanbanBoard({
     prs: prs
       .filter((pr) => pr.status === status)
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()),
-  })).filter((col) => col.prs.length > 0)
+  }))
 
   return (
     <div className="flex items-start gap-4 overflow-x-auto pb-4">
@@ -30,9 +30,15 @@ export function KanbanBoard({
             <span className="text-xs text-slate-600">{col.prs.length}</span>
           </div>
           <div className="flex flex-col gap-3">
-            {col.prs.map((pr) => (
-              <PrCard key={`${pr.repo}-${pr.number}`} pr={pr} onSelect={onSelect} isDismissed={isDismissed} />
-            ))}
+            {col.prs.length > 0 ? (
+              col.prs.map((pr) => (
+                <PrCard key={`${pr.repo}-${pr.number}`} pr={pr} onSelect={onSelect} isDismissed={isDismissed} />
+              ))
+            ) : (
+              <div className="rounded-lg border border-dashed border-slate-800 p-4 text-center text-xs text-slate-600">
+                No PRs
+              </div>
+            )}
           </div>
         </div>
       ))}
