@@ -5,6 +5,7 @@ import { PrDetailPanel } from './components/PrDetailPanel'
 import { RepoFilter } from './components/RepoFilter'
 import { SortToggle } from './components/SortToggle'
 import { formatRelativeTime } from './lib/formatRelativeTime'
+import { useCollapsedColumns } from './lib/useCollapsedColumns'
 import { useDismissedComments } from './lib/useDismissedComments'
 import { useExcludedRepos } from './lib/useExcludedRepos'
 import { useSortMode } from './lib/useSortMode'
@@ -16,6 +17,7 @@ export default function App() {
   const { dismiss, undismiss, isDismissed, prune } = useDismissedComments()
   const { excluded: excludedRepos, toggle: toggleRepo } = useExcludedRepos()
   const { mode: sortMode, setMode: setSortMode } = useSortMode()
+  const { collapsed: collapsedColumns, toggle: toggleColumn } = useCollapsedColumns()
 
   useEffect(() => {
     if (!data) return
@@ -70,7 +72,14 @@ export default function App() {
             <SortToggle mode={sortMode} onChange={setSortMode} />
           </div>
           {visiblePrs.length > 0 ? (
-            <KanbanBoard prs={visiblePrs} onSelect={setSelected} isDismissed={isDismissed} sortMode={sortMode} />
+            <KanbanBoard
+              prs={visiblePrs}
+              onSelect={setSelected}
+              isDismissed={isDismissed}
+              sortMode={sortMode}
+              collapsed={collapsedColumns}
+              onToggleCollapse={toggleColumn}
+            />
           ) : (
             <p className="text-slate-500">No PRs match the selected repos.</p>
           )}
