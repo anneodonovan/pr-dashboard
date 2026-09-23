@@ -1,6 +1,7 @@
 import type { Pr } from '../../server/types'
 import { formatRelativeTime } from '../lib/formatRelativeTime'
 import { CI_LABEL, REVIEW_CHIP, STALENESS_LABEL } from '../lib/labels'
+import { isTooBig, tooBigReason, TOO_BIG_BADGE_CLASSNAME } from '../lib/prSize'
 
 export function PrCard({
   pr,
@@ -64,6 +65,11 @@ export function PrCard({
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <span className={`rounded px-2 py-1 text-xs font-medium ${ci.className}`}>{ci.label}</span>
         {staleness && <span className={`rounded px-2 py-1 text-xs font-medium ${staleness.className}`}>{staleness.label}</span>}
+        {isTooBig(pr) && (
+          <span title={tooBigReason(pr)} className={`rounded px-2 py-1 text-xs font-medium ${TOO_BIG_BADGE_CLASSNAME}`}>
+            Too big
+          </span>
+        )}
         {activeUnaddressed.length > 0 && (
           <span
             title={activeUnaddressed.map((t) => `${t.author}: ${t.body.slice(0, 140)}`).join('\n\n')}

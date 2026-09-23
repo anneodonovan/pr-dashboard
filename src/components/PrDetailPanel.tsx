@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { Pr } from '../../server/types'
 import { formatRelativeTime } from '../lib/formatRelativeTime'
 import { CI_LABEL, REVIEW_CHIP, REVIEW_STATE_LABEL, STALENESS_LABEL, STATUS_LABEL, checkStatusColor } from '../lib/labels'
+import { isTooBig, tooBigReason, TOO_BIG_BADGE_CLASSNAME } from '../lib/prSize'
 import { Markdown } from './Markdown'
 
 function Stat({ label, value }: { label: string; value: string | number }) {
@@ -75,6 +76,11 @@ export function PrDetailPanel({
           <span className={`rounded px-2 py-1 text-xs font-medium ${status.className}`}>{status.label}</span>
           <span className={`rounded px-2 py-1 text-xs font-medium ${ci.className}`}>{ci.label}</span>
           {staleness && <span className={`rounded px-2 py-1 text-xs font-medium ${staleness.className}`}>{staleness.label}</span>}
+          {isTooBig(pr) && (
+            <span title={tooBigReason(pr)} className={`rounded px-2 py-1 text-xs font-medium ${TOO_BIG_BADGE_CLASSNAME}`}>
+              Too big
+            </span>
+          )}
         </div>
 
         <div className="mt-4 grid grid-cols-3 gap-2">
