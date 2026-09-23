@@ -15,13 +15,17 @@ function Stat({ label, value }: { label: string; value: string | number }) {
 
 export function PrDetailPanel({
   pr,
+  allPrs,
   onClose,
+  onSelectPr,
   isDismissed,
   dismiss,
   undismiss,
 }: {
   pr: Pr
+  allPrs: Pr[]
   onClose: () => void
+  onSelectPr: (pr: Pr) => void
   isDismissed: (url: string) => boolean
   dismiss: (url: string) => void
   undismiss: (url: string) => void
@@ -33,6 +37,12 @@ export function PrDetailPanel({
 
   const activeThreads = pr.unaddressedThreads.filter((t) => !isDismissed(t.url))
   const seenThreads = pr.unaddressedThreads.filter((t) => isDismissed(t.url))
+
+  const stackPrs = pr.stack
+    ? pr.stack.prNumbers
+        .map((n) => allPrs.find((p) => p.repo === pr.repo && p.number === n))
+        .filter((p): p is Pr => p !== undefined)
+    : []
 
   return (
     <>
@@ -190,6 +200,42 @@ export function PrDetailPanel({
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {stackPrs.length > 1 && (
+          <div className="mt-5">
+            <div className="mb-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
+              Stack ({pr.stack!.position} of {pr.stack!.total})
+            </div>
+            <div className="space-y-1.5">
+              {stackPrs.map((sp) => {
+                const isCurrent = sp.number === pr.number
+                return (
+                  <button
+                    key={sp.number}
+                    onClick={() => !isCurrent && onSelectPr(sp)}
+                    className={`flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-left ${
+                      isCurrent
+                        ? 'bg-sky-500/10 cursor-default'
+                        : 'bg-slate-800/40 hover:bg-slate-800/70 light:bg-slate-100 light:hover:bg-slate-200'
+                    }`}
+                  >
+                    <span className="text-xs text-slate-500">#{sp.stack?.position}</span>
+                    <span
+                      className={`flex-1 truncate text-sm ${
+                        isCurrent ? 'font-medium text-slate-100 light:text-slate-900' : 'text-slate-300 light:text-slate-700'
+                      }`}
+                    >
+                      {sp.title}
+                    </span>
+                    <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium ${STATUS_LABEL[sp.status].className}`}>
+                      {STATUS_LABEL[sp.status].label}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
           </div>
         )}
       </div>

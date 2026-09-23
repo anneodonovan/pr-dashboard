@@ -101,7 +101,15 @@ export default function App() {
       )}
 
       {selected && (
-        <PrDetailPanel pr={selected} onClose={() => setSelected(null)} isDismissed={isDismissed} dismiss={dismiss} undismiss={undismiss} />
+        <PrDetailPanel
+          pr={selected}
+          allPrs={data?.prs ?? []}
+          onClose={() => setSelected(null)}
+          onSelectPr={setSelected}
+          isDismissed={isDismissed}
+          dismiss={dismiss}
+          undismiss={undismiss}
+        />
       )}
     </div>
   )
