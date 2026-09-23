@@ -1,7 +1,7 @@
 import type { Pr } from '../../server/types'
 
-export const TOO_BIG_LINES = 500
-export const TOO_BIG_FILES = 10
+export const TOO_BIG_LINES = 650
+export const TOO_BIG_FILES = 15
 
 export const TOO_BIG_BADGE_CLASSNAME = 'bg-violet-500/15 text-violet-400 light:text-violet-700'
 
