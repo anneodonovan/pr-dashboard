@@ -35,7 +35,7 @@ export function KanbanBoard({
             key={col.status}
             onClick={() => onToggleCollapse(col.status)}
             title={`Show ${STATUS_LABEL[col.status].label}`}
-            className="flex shrink-0 flex-col items-center gap-2 rounded-lg border border-slate-800 bg-slate-900/60 px-1.5 py-3 hover:border-slate-700 light:border-slate-200 light:bg-white light:hover:border-slate-300"
+            className="flex shrink-0 flex-col items-center gap-2 rounded-lg border border-slate-800 bg-slate-900/60 px-1.5 py-3 hover:border-slate-700 light:border-slate-200 light:bg-white/60 light:hover:border-slate-300"
           >
             <span className={`h-2 w-2 shrink-0 rounded-full ${STATUS_DOT[col.status]} ${STATUS_GLOW[col.status]}`} />
             <span className="text-xs font-medium uppercase tracking-wide text-slate-400 light:text-slate-600 [writing-mode:vertical-rl]">
