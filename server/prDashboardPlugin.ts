@@ -2,7 +2,7 @@ import type { Plugin } from 'vite'
 import { fetchDashboard } from './fetchDashboard'
 import type { DashboardData } from './types'
 
-const REFRESH_INTERVAL_MS = 60_000
+const REFRESH_INTERVAL_MS = 15_000
 
 export function prDashboardPlugin(): Plugin {
   let cache: DashboardData | null = null
