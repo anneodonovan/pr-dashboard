@@ -128,14 +128,14 @@ export function SkyScene({ theme }: { theme: Theme }) {
       <path d={MOUNTAINS} fill="#0b1220" opacity={isDark ? 0.55 : 0.35} />
 
       {/* Solid ground band so no rock shows through the gaps between tree bases. */}
-      <rect x="0" y="860" width="1600" height="40" fill="#052e16" opacity={isDark ? 0.92 : 0.8} />
+      <rect x="0" y="860" width="1600" height="40" fill={isDark ? '#010a06' : '#052e16'} opacity={isDark ? 0.95 : 0.8} />
 
       {TREES.map((t, i) => (
         <polygon
           key={i}
           points={treePoints(t)}
-          fill={t.dark ? '#052e16' : '#14532d'}
-          opacity={isDark ? 0.92 : 0.8}
+          fill={isDark ? (t.dark ? '#010a06' : '#052e16') : t.dark ? '#052e16' : '#14532d'}
+          opacity={isDark ? 0.95 : 0.8}
         />
       ))}
     </svg>
