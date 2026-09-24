@@ -45,15 +45,20 @@ export default function App() {
 
   return (
     <div className="min-h-screen w-full px-6 py-8">
-      <header className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-100 light:text-slate-900">PR Dashboard</h1>
-          {data && (
-            <p className="text-sm text-slate-500">
-              {data.viewerLogin && `${data.viewerLogin} · `}
-              updated {formatRelativeTime(data.fetchedAt)}
-            </p>
-          )}
+      <header className="mb-8 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-lg text-indigo-300 shadow-[0_0_24px_-6px_rgba(99,102,241,0.6)] light:bg-indigo-500/10 light:text-indigo-600">
+            ✦
+          </span>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-100 light:text-slate-900">PR Dashboard</h1>
+            {data && (
+              <p className="text-sm text-slate-500">
+                {data.viewerLogin && `${data.viewerLogin} · `}
+                updated {formatRelativeTime(data.fetchedAt)}
+              </p>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <button
