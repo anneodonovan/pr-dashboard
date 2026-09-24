@@ -3,13 +3,12 @@
 /* Manual light/dark toggle: add/remove `.light` on <html>, then use `light:` variants everywhere. */
 @custom-variant light (&:where(.light, .light *));
 
+/* Flat fallback shown before the animated SkyScene mounts; it then paints over this. */
 body {
   min-height: 100vh;
-  background-color: #030712;
-  background-image: radial-gradient(circle at 50% -10%, rgb(99 102 241 / 0.18), transparent 55%);
+  background-color: #020617;
 }
 
 html.light body {
-  background-color: #f8fafc;
-  background-image: radial-gradient(circle at 50% -10%, rgb(99 102 241 / 0.07), transparent 55%);
+  background-color: #bae6fd;
 }
