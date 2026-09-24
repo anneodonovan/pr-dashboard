@@ -1,7 +1,10 @@
+import { motion } from 'motion/react'
 import type { Pr } from '../../server/types'
 import { formatRelativeTime } from '../lib/formatRelativeTime'
 import { CI_LABEL, REVIEW_CHIP, STALENESS_LABEL } from '../lib/labels'
 import { isTooBig, tooBigReason, TOO_BIG_BADGE_CLASSNAME } from '../lib/prSize'
+
+const RECENT_MS = 5 * 60 * 1000
 
 export function PrCard({
   pr,
@@ -18,6 +21,7 @@ export function PrCard({
   const hasUnaddressed = activeUnaddressed.length > 0
   const hasConflicts = pr.staleness === 'conflicts'
   const needsRebase = pr.staleness === 'needs-rebase'
+  const isRecent = Date.now() - new Date(pr.updatedAt).getTime() < RECENT_MS
 
   const cardTint = hasUnaddressed
     ? 'border-fuchsia-500/30 bg-fuchsia-500/[0.06] hover:border-fuchsia-500/50'
@@ -25,12 +29,14 @@ export function PrCard({
       ? 'border-red-500/30 bg-red-500/[0.06] hover:border-red-500/50'
       : needsRebase
         ? 'border-amber-500/30 bg-amber-500/[0.06] hover:border-amber-500/50'
-        : 'border-slate-800 bg-slate-900 hover:border-slate-700 light:border-slate-200 light:bg-white light:hover:border-slate-300'
+        : 'border-slate-800/80 bg-slate-900/60 hover:border-slate-600 light:border-slate-200 light:bg-white light:hover:border-slate-300'
 
   return (
-    <div
+    <motion.div
       onClick={() => onSelect?.(pr)}
-      className={`cursor-pointer rounded-lg border p-4 transition-colors ${cardTint}`}
+      className={`group cursor-pointer rounded-xl border p-4 backdrop-blur-sm transition-colors ${cardTint}`}
+      whileHover={{ y: -3, boxShadow: '0 12px 28px -12px rgba(99, 102, 241, 0.35)' }}
+      transition={{ type: 'spring', stiffness: 400, damping: 28 }}
     >
       <div className="flex items-start justify-between gap-3">
         <a
@@ -42,7 +48,18 @@ export function PrCard({
         >
           {pr.title}
         </a>
-        <span className="whitespace-nowrap text-xs text-slate-500">{formatRelativeTime(pr.updatedAt)}</span>
+        <div className="flex shrink-0 items-center gap-1.5">
+          {isRecent && (
+            <span className="relative flex h-1.5 w-1.5" title="Updated in the last few minutes">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-sky-400" />
+            </span>
+          )}
+          <span className="whitespace-nowrap text-xs text-slate-500">{formatRelativeTime(pr.updatedAt)}</span>
+          <span className="translate-x-[-2px] text-sm text-slate-600 opacity-0 transition-all duration-150 group-hover:translate-x-0 group-hover:opacity-100 light:text-slate-400">
+            →
+          </span>
+        </div>
       </div>
 
       <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
@@ -93,6 +110,6 @@ export function PrCard({
           ))}
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }
