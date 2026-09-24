@@ -13,6 +13,21 @@ const MOUNTAINS =
 
 const HORIZON_X = 560
 
+// A dense pine treeline along the base of the mountains, in front of them.
+// Positions/heights are deterministic (index-derived jitter), not random,
+// so the scene renders identically on every pass.
+const TREES = Array.from({ length: 46 }, (_, i) => {
+  const x = (i / 46) * 1650 - 25 + ((i * 13) % 19)
+  const height = 55 + ((i * 29) % 60)
+  const width = height * 0.4
+  const baseY = 900 - ((i * 7) % 16)
+  return { x, height, width, baseY }
+})
+
+function treePoints(t: (typeof TREES)[number]): string {
+  return `${t.x},${t.baseY - t.height} ${t.x + t.width / 2},${t.baseY} ${t.x - t.width / 2},${t.baseY}`
+}
+
 export function SkyScene({ theme }: { theme: Theme }) {
   const isDark = theme === 'dark'
 
@@ -106,6 +121,10 @@ export function SkyScene({ theme }: { theme: Theme }) {
       />
 
       <path d={MOUNTAINS} fill="#0b1220" opacity={isDark ? 0.55 : 0.35} />
+
+      {TREES.map((t, i) => (
+        <polygon key={i} points={treePoints(t)} fill="#0b1220" opacity={isDark ? 0.85 : 0.6} />
+      ))}
     </svg>
   )
 }
