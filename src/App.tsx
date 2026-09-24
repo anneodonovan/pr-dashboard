@@ -3,7 +3,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { usePrDashboard } from './api/dashboard'
 import { CopyLinksButton } from './components/CopyLinksButton'
 import { KanbanBoard } from './components/KanbanBoard'
-import { NotificationToggle } from './components/NotificationToggle'
+import { NotificationBell } from './components/NotificationBell'
+import { NotificationCenter } from './components/NotificationCenter'
 import { PrDetailPanel } from './components/PrDetailPanel'
 import { RepoFilter } from './components/RepoFilter'
 import { SkyScene } from './components/SkyScene'
@@ -24,6 +25,7 @@ import type { Pr } from '../server/types'
 export default function App() {
   const { data, loading, refreshing, refresh, justUpdated } = usePrDashboard()
   const [selected, setSelected] = useState<Pr | null>(null)
+  const [notificationCenterOpen, setNotificationCenterOpen] = useState(false)
   const { dismiss, undismiss, isDismissed, prune } = useDismissedComments()
   const { excluded: excludedRepos, toggle: toggleRepo } = useExcludedRepos()
   const { mode: sortMode, setMode: setSortMode } = useSortMode()
@@ -33,7 +35,8 @@ export default function App() {
   const { enabled: notificationsEnabled, permission: notificationPermission, toggle: toggleNotifications } =
     useNotificationPreference()
 
-  usePrNotifications(data, notificationsEnabled)
+  const { entries: notificationEntries, unseenCount: unseenNotifications, markSeen: markNotificationsSeen, clear: clearNotifications } =
+    usePrNotifications(data, notificationsEnabled)
 
   useEffect(() => {
     if (!data) return
@@ -91,10 +94,12 @@ export default function App() {
           >
             {refreshing ? 'Refreshing…' : 'Refresh'}
           </button>
-          <NotificationToggle
-            enabled={notificationsEnabled}
-            permission={notificationPermission}
-            onToggle={toggleNotifications}
+          <NotificationBell
+            unseenCount={unseenNotifications}
+            onClick={() => {
+              setNotificationCenterOpen(true)
+              markNotificationsSeen()
+            }}
           />
           <ThemeToggle theme={theme} onToggle={toggleTheme} />
         </div>
@@ -135,6 +140,17 @@ export default function App() {
             <p className="text-slate-500">No PRs match the current filters.</p>
           )}
         </div>
+      )}
+
+      {notificationCenterOpen && (
+        <NotificationCenter
+          entries={notificationEntries}
+          onClose={() => setNotificationCenterOpen(false)}
+          onClear={clearNotifications}
+          desktopEnabled={notificationsEnabled}
+          desktopPermission={notificationPermission}
+          onToggleDesktop={toggleNotifications}
+        />
       )}
 
       {selected && (
