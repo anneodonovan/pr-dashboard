@@ -45,7 +45,7 @@ export function PrCard({
       ? 'border-red-500/30 bg-red-500/[0.06] hover:border-red-500/50'
       : needsRebase
         ? 'border-amber-500/30 bg-amber-500/[0.06] hover:border-amber-500/50'
-        : 'border-slate-800/80 bg-slate-900/60 hover:border-slate-600 light:border-slate-200 light:bg-white light:hover:border-slate-300'
+        : 'border-slate-800/80 bg-slate-900/60 hover:border-slate-600 light:border-slate-200 light:bg-white/90 light:hover:border-slate-300'
 
   return (
     <motion.div
