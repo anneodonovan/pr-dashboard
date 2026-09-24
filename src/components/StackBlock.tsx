@@ -1,3 +1,4 @@
+import { motion } from 'motion/react'
 import type { Pr } from '../../server/types'
 import { PrCard } from './PrCard'
 
@@ -11,7 +12,14 @@ export function StackBlock({
   isDismissed: (url: string) => boolean
 }) {
   return (
-    <div className="rounded-xl border border-slate-800/60 bg-slate-950/40 p-3 light:border-slate-200 light:bg-slate-100/50">
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.97 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.97 }}
+      transition={{ layout: { type: 'spring', stiffness: 350, damping: 32 } }}
+      className="rounded-xl border border-slate-800/60 bg-slate-950/40 p-3 light:border-slate-200 light:bg-slate-100/50"
+    >
       <div className="mb-2 px-1 text-xs font-medium uppercase tracking-wide text-slate-500">
         {prs[0].repo.split('/')[1]} stack &middot; {prs.length} PRs
       </div>
@@ -24,6 +32,6 @@ export function StackBlock({
           </div>
         ))}
       </div>
-    </div>
+    </motion.div>
   )
 }

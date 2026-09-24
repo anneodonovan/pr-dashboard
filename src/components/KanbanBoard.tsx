@@ -1,3 +1,4 @@
+import { AnimatePresence } from 'motion/react'
 import type { Pr, PrStatus } from '../../server/types'
 import { groupIntoStacks } from '../lib/groupIntoStacks'
 import { STATUS_DOT, STATUS_GLOW, STATUS_LABEL, STATUS_LANE_BG, STATUS_ORDER } from '../lib/labels'
@@ -60,13 +61,15 @@ export function KanbanBoard({
             </button>
             <div className="flex flex-col gap-3">
               {col.prs.length > 0 ? (
-                groupIntoStacks(col.prs).map((group) =>
-                  group.length > 1 ? (
-                    <StackBlock key={`${group[0].repo}-${group[0].stack!.prNumbers.join(',')}`} prs={group} onSelect={onSelect} isDismissed={isDismissed} />
-                  ) : (
-                    <PrCard key={`${group[0].repo}-${group[0].number}`} pr={group[0]} onSelect={onSelect} isDismissed={isDismissed} />
-                  ),
-                )
+                <AnimatePresence mode="popLayout">
+                  {groupIntoStacks(col.prs).map((group) =>
+                    group.length > 1 ? (
+                      <StackBlock key={`${group[0].repo}-${group[0].stack!.prNumbers.join(',')}`} prs={group} onSelect={onSelect} isDismissed={isDismissed} />
+                    ) : (
+                      <PrCard key={`${group[0].repo}-${group[0].number}`} pr={group[0]} onSelect={onSelect} isDismissed={isDismissed} />
+                    ),
+                  )}
+                </AnimatePresence>
               ) : (
                 <ColumnEmptyState status={col.status} />
               )}

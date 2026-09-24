@@ -1,4 +1,5 @@
 import { motion } from 'motion/react'
+import { useEffect, useRef, useState } from 'react'
 import type { Pr } from '../../server/types'
 import { formatRelativeTime } from '../lib/formatRelativeTime'
 import { CI_LABEL, REVIEW_CHIP, STALENESS_LABEL } from '../lib/labels'
@@ -6,6 +7,7 @@ import { isTooBig, tooBigReason, TOO_BIG_BADGE_CLASSNAME } from '../lib/prSize'
 import { StackProgress } from './StackProgress'
 
 const RECENT_MS = 5 * 60 * 1000
+const GLOW_MS = 1100
 
 export function PrCard({
   pr,
@@ -24,6 +26,19 @@ export function PrCard({
   const needsRebase = pr.staleness === 'needs-rebase'
   const isRecent = Date.now() - new Date(pr.updatedAt).getTime() < RECENT_MS
 
+  // Briefly glow after landing in a new status column, so a move between
+  // lanes reads as an event rather than a silent re-render.
+  const [justMoved, setJustMoved] = useState(false)
+  const prevStatus = useRef(pr.status)
+  useEffect(() => {
+    if (prevStatus.current !== pr.status) {
+      prevStatus.current = pr.status
+      setJustMoved(true)
+      const t = setTimeout(() => setJustMoved(false), GLOW_MS)
+      return () => clearTimeout(t)
+    }
+  }, [pr.status])
+
   const cardTint = hasUnaddressed
     ? 'border-fuchsia-500/30 bg-fuchsia-500/[0.06] hover:border-fuchsia-500/50'
     : hasConflicts
@@ -34,10 +49,23 @@ export function PrCard({
 
   return (
     <motion.div
+      layout
+      layoutId={`pr-${pr.repo}-${pr.number}`}
+      initial={{ opacity: 0, scale: 0.96 }}
+      animate={
+        justMoved
+          ? { opacity: 1, scale: 1, boxShadow: ['0 0 0px rgba(129,140,248,0)', '0 0 26px rgba(129,140,248,0.55)', '0 0 0px rgba(129,140,248,0)'] }
+          : { opacity: 1, scale: 1 }
+      }
+      exit={{ opacity: 0, scale: 0.96 }}
       onClick={() => onSelect?.(pr)}
       className={`group cursor-pointer rounded-xl border p-4 backdrop-blur-sm transition-colors ${cardTint}`}
       whileHover={{ y: -3, boxShadow: '0 12px 28px -12px rgba(99, 102, 241, 0.35)' }}
-      transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+      transition={{
+        layout: { type: 'spring', stiffness: 350, damping: 32 },
+        boxShadow: { duration: GLOW_MS / 1000, ease: 'easeOut' },
+        default: { type: 'spring', stiffness: 400, damping: 28 },
+      }}
     >
       <div className="flex items-start justify-between gap-3">
         <a
