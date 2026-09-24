@@ -13,15 +13,20 @@ const MOUNTAINS =
 
 const HORIZON_X = 560
 
-// A dense pine treeline along the base of the mountains, in front of them.
-// Positions/heights are deterministic (index-derived jitter), not random,
-// so the scene renders identically on every pass.
-const TREES = Array.from({ length: 46 }, (_, i) => {
-  const x = (i / 46) * 1650 - 25 + ((i * 13) % 19)
-  const height = 55 + ((i * 29) % 60)
-  const width = height * 0.4
-  const baseY = 900 - ((i * 7) % 16)
-  return { x, height, width, baseY }
+// A dense, overlapping pine treeline along the base of the mountains, in
+// front of them, wide enough to fully cover the mountain rock at the very
+// bottom of the screen instead of leaving gaps between trees. Positions and
+// heights are deterministic (index-derived jitter), not random, so the
+// scene renders identically on every pass.
+const TREE_BASE_Y = 900
+const TREE_COUNT = 80
+const TREES = Array.from({ length: TREE_COUNT }, (_, i) => {
+  const x = (i / TREE_COUNT) * 1680 - 40 + ((i * 13) % 19)
+  const height = 70 + ((i * 29) % 90)
+  const width = height * 0.62
+  const baseY = TREE_BASE_Y - ((i * 7) % 16)
+  const dark = i % 2 === 0
+  return { x, height, width, baseY, dark }
 })
 
 function treePoints(t: (typeof TREES)[number]): string {
@@ -122,8 +127,16 @@ export function SkyScene({ theme }: { theme: Theme }) {
 
       <path d={MOUNTAINS} fill="#0b1220" opacity={isDark ? 0.55 : 0.35} />
 
+      {/* Solid ground band so no rock shows through the gaps between tree bases. */}
+      <rect x="0" y="860" width="1600" height="40" fill="#052e16" opacity={isDark ? 0.92 : 0.8} />
+
       {TREES.map((t, i) => (
-        <polygon key={i} points={treePoints(t)} fill="#0b1220" opacity={isDark ? 0.85 : 0.6} />
+        <polygon
+          key={i}
+          points={treePoints(t)}
+          fill={t.dark ? '#052e16' : '#14532d'}
+          opacity={isDark ? 0.92 : 0.8}
+        />
       ))}
     </svg>
   )
