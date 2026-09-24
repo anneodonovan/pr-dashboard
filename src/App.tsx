@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useMemo, useState } from 'react'
 import { usePrDashboard } from './api/dashboard'
 import { CopyLinksButton } from './components/CopyLinksButton'
@@ -17,7 +18,7 @@ import { useUnaddressedOnly } from './lib/useUnaddressedOnly'
 import type { Pr } from '../server/types'
 
 export default function App() {
-  const { data, loading, refreshing, refresh } = usePrDashboard()
+  const { data, loading, refreshing, refresh, justUpdated } = usePrDashboard()
   const [selected, setSelected] = useState<Pr | null>(null)
   const { dismiss, undismiss, isDismissed, prune } = useDismissedComments()
   const { excluded: excludedRepos, toggle: toggleRepo } = useExcludedRepos()
@@ -61,6 +62,19 @@ export default function App() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <AnimatePresence>
+            {justUpdated > 0 && (
+              <motion.span
+                initial={{ opacity: 0, y: -6, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -6, scale: 0.95 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 26 }}
+                className="rounded-full bg-indigo-500/15 px-3 py-1.5 text-xs font-medium text-indigo-300 light:bg-indigo-500/10 light:text-indigo-700"
+              >
+                ✨ {justUpdated} {justUpdated === 1 ? 'PR' : 'PRs'} updated
+              </motion.span>
+            )}
+          </AnimatePresence>
           <button
             onClick={refresh}
             disabled={refreshing}
