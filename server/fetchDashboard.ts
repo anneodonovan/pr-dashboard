@@ -223,10 +223,14 @@ function deriveStatus(pr: {
   reviewers: Reviewer[]
   reviewDecision: string | null
   mergeStateStatus: string
+  hasUnaddressed: boolean
 }): PrStatus {
   if (pr.isDraft) return 'draft'
   if (pr.reviewers.length === 0) return 'no-reviewer'
   if (pr.reviewDecision === 'CHANGES_REQUESTED') return 'changes-requested'
+  // Unaddressed feedback acts like an informal changes-requested, even when
+  // no one has formally blocked the PR through GitHub's review decision.
+  if (pr.hasUnaddressed) return 'changes-requested'
   if (pr.reviewDecision === 'APPROVED') {
     return pr.mergeStateStatus === 'CLEAN' ? 'ready-to-merge' : 'approved'
   }
@@ -242,6 +246,10 @@ async function fetchPrDetail(nameWithOwner: string, number: number, viewerLogin:
   const reviewers = deriveReviewers(pr)
   const rollup = pr.commits.nodes[0]?.commit.statusCheckRollup
   const unaddressedGeneralComment = deriveUnaddressedGeneralComment(pr.comments.nodes, viewerLogin)
+  const unaddressedThreads = [
+    ...deriveUnaddressedThreads(pr.reviewThreads.nodes, viewerLogin),
+    ...(unaddressedGeneralComment ? [unaddressedGeneralComment] : []),
+  ]
 
   return {
     repo: nameWithOwner,
@@ -254,16 +262,19 @@ async function fetchPrDetail(nameWithOwner: string, number: number, viewerLogin:
     updatedAt: pr.updatedAt,
     headRefName: pr.headRefName,
     baseRefName: pr.baseRefName,
-    status: deriveStatus({ isDraft: pr.isDraft, reviewers, reviewDecision: pr.reviewDecision, mergeStateStatus: pr.mergeStateStatus }),
+    status: deriveStatus({
+      isDraft: pr.isDraft,
+      reviewers,
+      reviewDecision: pr.reviewDecision,
+      mergeStateStatus: pr.mergeStateStatus,
+      hasUnaddressed: unaddressedThreads.length > 0,
+    }),
     ciStatus: mapCiStatus(rollup?.state),
     checks: mapChecks(rollup?.contexts.nodes ?? []),
     staleness: mapStaleness(pr.mergeStateStatus),
     reviewDecision: pr.reviewDecision,
     reviewers,
-    unaddressedThreads: [
-      ...deriveUnaddressedThreads(pr.reviewThreads.nodes, viewerLogin),
-      ...(unaddressedGeneralComment ? [unaddressedGeneralComment] : []),
-    ],
+    unaddressedThreads,
     additions: pr.additions,
     deletions: pr.deletions,
     changedFiles: pr.changedFiles,
