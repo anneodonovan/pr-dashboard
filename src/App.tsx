@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { usePrDashboard } from './api/dashboard'
+import { CopyLinksButton } from './components/CopyLinksButton'
 import { KanbanBoard } from './components/KanbanBoard'
 import { PrDetailPanel } from './components/PrDetailPanel'
 import { RepoFilter } from './components/RepoFilter'
@@ -83,7 +84,10 @@ export default function App() {
               <RepoFilter repos={repoCounts} excluded={excludedRepos} onToggle={toggleRepo} />
               <UnaddressedToggle enabled={unaddressedOnly} onToggle={toggleUnaddressedOnly} />
             </div>
-            <SortToggle mode={sortMode} onChange={setSortMode} />
+            <div className="flex items-center gap-3">
+              <CopyLinksButton prs={visiblePrs} sortMode={sortMode} />
+              <SortToggle mode={sortMode} onChange={setSortMode} />
+            </div>
           </div>
           {visiblePrs.length > 0 ? (
             <KanbanBoard
