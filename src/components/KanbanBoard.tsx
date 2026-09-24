@@ -1,7 +1,8 @@
 import type { Pr, PrStatus } from '../../server/types'
 import { groupIntoStacks } from '../lib/groupIntoStacks'
-import { STATUS_DOT, STATUS_LABEL, STATUS_ORDER } from '../lib/labels'
+import { STATUS_DOT, STATUS_GLOW, STATUS_LABEL, STATUS_LANE_BG, STATUS_ORDER } from '../lib/labels'
 import { sortPrs, type SortMode } from '../lib/sortPrs'
+import { ColumnEmptyState } from './ColumnEmptyState'
 import { PrCard } from './PrCard'
 import { StackBlock } from './StackBlock'
 
@@ -35,20 +36,23 @@ export function KanbanBoard({
             title={`Show ${STATUS_LABEL[col.status].label}`}
             className="flex shrink-0 flex-col items-center gap-2 rounded-lg border border-slate-800 bg-slate-900/60 px-1.5 py-3 hover:border-slate-700 light:border-slate-200 light:bg-white light:hover:border-slate-300"
           >
-            <span className={`h-2 w-2 shrink-0 rounded-full ${STATUS_DOT[col.status]}`} />
+            <span className={`h-2 w-2 shrink-0 rounded-full ${STATUS_DOT[col.status]} ${STATUS_GLOW[col.status]}`} />
             <span className="text-xs font-medium uppercase tracking-wide text-slate-400 light:text-slate-600 [writing-mode:vertical-rl]">
               {STATUS_LABEL[col.status].label}
             </span>
             <span className="text-xs text-slate-600">{col.prs.length}</span>
           </button>
         ) : (
-          <div key={col.status} className="min-w-[280px] flex-1">
+          <div
+            key={col.status}
+            className={`min-w-[280px] flex-1 rounded-2xl border p-2.5 ${STATUS_LANE_BG[col.status]}`}
+          >
             <button
               onClick={() => onToggleCollapse(col.status)}
               title="Collapse column"
               className="mb-2 flex w-full items-center gap-2 rounded px-1 py-0.5 hover:bg-slate-800/40 light:hover:bg-slate-200/60"
             >
-              <span className={`h-2 w-2 shrink-0 rounded-full ${STATUS_DOT[col.status]}`} />
+              <span className={`h-2 w-2 shrink-0 rounded-full ${STATUS_DOT[col.status]} ${STATUS_GLOW[col.status]}`} />
               <span className="text-xs font-medium uppercase tracking-wide text-slate-400 light:text-slate-600">
                 {STATUS_LABEL[col.status].label}
               </span>
@@ -64,9 +68,7 @@ export function KanbanBoard({
                   ),
                 )
               ) : (
-                <div className="rounded-lg border border-dashed border-slate-800 p-4 text-center text-xs text-slate-600 light:border-slate-300">
-                  No PRs
-                </div>
+                <ColumnEmptyState status={col.status} />
               )}
             </div>
           </div>
