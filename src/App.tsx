@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { usePrDashboard } from './api/dashboard'
 import { CopyLinksButton } from './components/CopyLinksButton'
 import { KanbanBoard } from './components/KanbanBoard'
+import { NotificationToggle } from './components/NotificationToggle'
 import { PrDetailPanel } from './components/PrDetailPanel'
 import { RepoFilter } from './components/RepoFilter'
 import { SkyScene } from './components/SkyScene'
@@ -13,6 +14,8 @@ import { formatRelativeTime } from './lib/formatRelativeTime'
 import { useCollapsedColumns } from './lib/useCollapsedColumns'
 import { useDismissedComments } from './lib/useDismissedComments'
 import { useExcludedRepos } from './lib/useExcludedRepos'
+import { useNotificationPreference } from './lib/useNotificationPreference'
+import { usePrNotifications } from './lib/usePrNotifications'
 import { useSortMode } from './lib/useSortMode'
 import { useTheme } from './lib/useTheme'
 import { useUnaddressedOnly } from './lib/useUnaddressedOnly'
@@ -27,6 +30,10 @@ export default function App() {
   const { collapsed: collapsedColumns, toggle: toggleColumn } = useCollapsedColumns()
   const { theme, toggle: toggleTheme } = useTheme()
   const { enabled: unaddressedOnly, toggle: toggleUnaddressedOnly } = useUnaddressedOnly()
+  const { enabled: notificationsEnabled, permission: notificationPermission, toggle: toggleNotifications } =
+    useNotificationPreference()
+
+  usePrNotifications(data, notificationsEnabled)
 
   useEffect(() => {
     if (!data) return
@@ -84,6 +91,11 @@ export default function App() {
           >
             {refreshing ? 'Refreshing…' : 'Refresh'}
           </button>
+          <NotificationToggle
+            enabled={notificationsEnabled}
+            permission={notificationPermission}
+            onToggle={toggleNotifications}
+          />
           <ThemeToggle theme={theme} onToggle={toggleTheme} />
         </div>
       </header>
