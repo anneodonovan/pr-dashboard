@@ -3,6 +3,7 @@ import type { Pr } from '../../server/types'
 import { formatRelativeTime } from '../lib/formatRelativeTime'
 import { CI_LABEL, REVIEW_CHIP, STALENESS_LABEL } from '../lib/labels'
 import { isTooBig, tooBigReason, TOO_BIG_BADGE_CLASSNAME } from '../lib/prSize'
+import { StackProgress } from './StackProgress'
 
 const RECENT_MS = 5 * 60 * 1000
 
@@ -69,14 +70,7 @@ export function PrCard({
         <span className="font-mono">
           <span className="text-emerald-500">+{pr.additions}</span> <span className="text-red-500">-{pr.deletions}</span>
         </span>
-        {pr.stack && (
-          <span
-            title={`Stack: ${pr.stack.prNumbers.map((n) => `#${n}`).join(' → ')}`}
-            className="rounded bg-indigo-500/15 px-1.5 py-0.5 font-medium text-indigo-300 light:text-indigo-700"
-          >
-            stack {pr.stack.position}/{pr.stack.total}
-          </span>
-        )}
+        {pr.stack && <StackProgress position={pr.stack.position} total={pr.stack.total} prNumbers={pr.stack.prNumbers} />}
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
