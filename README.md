@@ -35,8 +35,9 @@ the local dev server is required.
   `mergeStateStatus`.
 
 ## Visual References
-  <img width="1918" height="1035" alt="Screenshot 2026-09-22 at 16 34 17" src="https://github.com/user-attachments/assets/ad94e277-ab9f-4cbd-9872-6c6713bcdd85" />
-  #### Light mode
 
-  <img width="1919" height="1035" alt="Screenshot 2026-09-22 at 16 33 42" src="https://github.com/user-attachments/assets/39de2d3a-4ceb-4130-8615-7ff537be3027" />
-  #### Dark mode
+#### Light mode (day)
+<img width="1918" height="1035" alt="Light mode, with a daytime sky background" src="docs/screenshots/light-mode.png" />
+
+#### Dark mode (night)
+<img width="1919" height="1035" alt="Dark mode, with a night sky background, moon and stars" src="docs/screenshots/dark-mode.png" />
