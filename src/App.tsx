@@ -45,7 +45,7 @@ export default function App() {
   )
 
   return (
-    <div className="min-h-screen w-full px-6 py-8">
+    <div className="flex min-h-screen w-full flex-col px-6 py-8">
       <header className="mb-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-lg text-indigo-300 shadow-[0_0_24px_-6px_rgba(99,102,241,0.6)] light:bg-indigo-500/10 light:text-indigo-600">
@@ -97,7 +97,7 @@ export default function App() {
       {data && data.prs.length === 0 && <p className="text-slate-500">No open PRs found.</p>}
 
       {data && data.prs.length > 0 && (
-        <>
+        <div className="flex flex-1 flex-col">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-3">
               <RepoFilter repos={repoCounts} excluded={excludedRepos} onToggle={toggleRepo} />
@@ -120,7 +120,7 @@ export default function App() {
           ) : (
             <p className="text-slate-500">No PRs match the current filters.</p>
           )}
-        </>
+        </div>
       )}
 
       {selected && (

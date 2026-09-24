@@ -28,7 +28,7 @@ export function KanbanBoard({
   }))
 
   return (
-    <div className="flex items-start gap-3 overflow-x-auto pb-4">
+    <div className="flex flex-1 items-stretch gap-3 overflow-x-auto pb-4">
       {columns.map((col) =>
         collapsed.has(col.status) ? (
           <button
@@ -46,7 +46,7 @@ export function KanbanBoard({
         ) : (
           <div
             key={col.status}
-            className={`min-w-[280px] flex-1 rounded-2xl border p-2.5 ${STATUS_LANE_BG[col.status]}`}
+            className={`flex min-w-[280px] flex-1 flex-col rounded-2xl border p-2.5 ${STATUS_LANE_BG[col.status]}`}
           >
             <button
               onClick={() => onToggleCollapse(col.status)}
