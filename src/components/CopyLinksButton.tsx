@@ -5,9 +5,9 @@ import type { SortMode } from '../lib/sortPrs'
 
 export function CopyLinksButton({ prs, sortMode }: { prs: Pr[]; sortMode: SortMode }) {
   const [copied, setCopied] = useState(false)
+  const text = buildPrLinksText(prs, sortMode)
 
   const handleClick = async () => {
-    const text = buildPrLinksText(prs, sortMode)
     try {
       await navigator.clipboard.writeText(text)
       setCopied(true)
@@ -21,6 +21,7 @@ export function CopyLinksButton({ prs, sortMode }: { prs: Pr[]; sortMode: SortMo
     <button
       onClick={handleClick}
       disabled={prs.length === 0}
+      title={text || 'No PRs to copy'}
       className="rounded-md bg-slate-800 px-3 py-1.5 text-sm font-medium text-slate-200 hover:bg-slate-700 disabled:opacity-50 light:bg-slate-100 light:text-slate-700 light:hover:bg-slate-200"
     >
       {copied ? 'Copied!' : 'Copy links'}
