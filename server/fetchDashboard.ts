@@ -78,6 +78,7 @@ const PR_DETAIL_FIELDS = `
   reviewThreads(first: 50) {
     nodes {
       isResolved
+      isOutdated
       comments(first: 50) {
         nodes { author { login } body url }
       }
@@ -129,6 +130,7 @@ async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (item: T)
 
 interface RawReviewThread {
   isResolved: boolean
+  isOutdated: boolean
   comments: { nodes: Array<{ author: { login: string } | null; body: string; url: string }> }
 }
 
@@ -228,7 +230,10 @@ function deriveReviewers(detail: RawPr): Reviewer[] {
 function deriveUnaddressedThreads(threads: RawReviewThread[], viewerLogin: string): UnaddressedThread[] {
   const unaddressed: UnaddressedThread[] = []
   for (const thread of threads) {
-    if (thread.isResolved) continue
+    // A resolved thread was explicitly closed out; an outdated one had its
+    // commented-on lines changed by a later push, so the feedback no longer
+    // applies to the current diff even though nobody clicked "Resolve".
+    if (thread.isResolved || thread.isOutdated) continue
     const comments = thread.comments.nodes
     if (comments.length === 0) continue
     const last = comments[comments.length - 1]
