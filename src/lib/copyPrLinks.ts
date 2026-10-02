@@ -12,8 +12,6 @@ function copyStatusLabel(pr: Pr): string {
   switch (pr.status) {
     case 'draft':
       return 'Draft, not ready for review'
-    case 'no-reviewer':
-      return 'Needs a reviewer assigned'
     case 'waiting-for-approval': {
       const hasPriorReview = pr.reviewers.some((r) => r.state !== 'pending')
       return hasPriorReview ? 'Ready for re-review' : 'Ready for review'
