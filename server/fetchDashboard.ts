@@ -268,6 +268,7 @@ function deriveStatus(pr: {
   reviewDecision: string | null
   mergeStateStatus: string
   hasUnaddressed: boolean
+  ciStatus: CiStatus
 }): PrStatus {
   if (pr.isDraft) return 'draft'
   if (pr.reviewers.length === 0) return 'no-reviewer'
@@ -276,7 +277,8 @@ function deriveStatus(pr: {
   // no one has formally blocked the PR through GitHub's review decision.
   if (pr.hasUnaddressed) return 'changes-requested'
   if (pr.reviewDecision === 'APPROVED') {
-    return pr.mergeStateStatus === 'CLEAN' ? 'ready-to-merge' : 'approved'
+    const ciBlocking = pr.ciStatus === 'failure' || pr.ciStatus === 'pending'
+    return pr.mergeStateStatus === 'CLEAN' && !ciBlocking ? 'ready-to-merge' : 'approved'
   }
   return 'waiting-for-approval'
 }
@@ -284,6 +286,7 @@ function deriveStatus(pr: {
 function mapPrDetail(nameWithOwner: string, number: number, viewerLogin: string, pr: RawPr): Pr {
   const reviewers = deriveReviewers(pr)
   const rollup = pr.commits.nodes[0]?.commit.statusCheckRollup
+  const ciStatus = mapCiStatus(rollup?.state)
   const unaddressedGeneralComment = deriveUnaddressedGeneralComment(pr.comments.nodes, viewerLogin)
   const unaddressedThreads = [
     ...deriveUnaddressedThreads(pr.reviewThreads.nodes, viewerLogin),
@@ -307,8 +310,9 @@ function mapPrDetail(nameWithOwner: string, number: number, viewerLogin: string,
       reviewDecision: pr.reviewDecision,
       mergeStateStatus: pr.mergeStateStatus,
       hasUnaddressed: unaddressedThreads.length > 0,
+      ciStatus,
     }),
-    ciStatus: mapCiStatus(rollup?.state),
+    ciStatus,
     checks: mapChecks(rollup?.contexts.nodes ?? []),
     staleness: mapStaleness(pr.mergeStateStatus),
     reviewDecision: pr.reviewDecision,
@@ -320,6 +324,15 @@ function mapPrDetail(nameWithOwner: string, number: number, viewerLogin: string,
     commitsCount: pr.commits.totalCount,
     commentsCount: pr.comments.totalCount,
     stack: null,
+  }
+}
+
+/** A PR isn't truly ready to merge while it's stacked behind another open PR — it depends on that one merging first, however individually approved and clean it is. */
+function downgradeBlockedStackMembers(prs: Pr[]): void {
+  for (const pr of prs) {
+    if (pr.status === 'ready-to-merge' && pr.stack && pr.stack.position > 1) {
+      pr.status = 'approved'
+    }
   }
 }
 
@@ -359,6 +372,7 @@ export async function fetchDashboard(): Promise<DashboardData> {
   const prs = await fetchPrDetails(refs, viewerLogin)
 
   annotateStacks(prs)
+  downgradeBlockedStackMembers(prs)
 
   return {
     viewerLogin,
