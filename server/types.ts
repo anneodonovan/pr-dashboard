@@ -7,7 +7,6 @@ export type ReviewState = 'approved' | 'changes-requested' | 'commented' | 'pend
 /** A single, primary "where does this PR stand" label, most useful signal wins. */
 export type PrStatus =
   | 'draft'
-  | 'no-reviewer'
   | 'changes-requested'
   | 'waiting-for-approval'
   | 'approved'

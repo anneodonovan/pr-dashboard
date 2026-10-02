@@ -2,7 +2,6 @@ import type { CiStatus, PrStatus, ReviewState, Staleness } from '../../server/ty
 
 export const STATUS_LABEL: Record<PrStatus, { label: string; className: string }> = {
   draft: { label: 'Draft', className: 'bg-slate-700/50 text-slate-300 light:bg-slate-200 light:text-slate-700' },
-  'no-reviewer': { label: 'No reviewer assigned', className: 'bg-orange-500/15 text-orange-400 light:text-orange-700' },
   'changes-requested': { label: 'Changes requested', className: 'bg-red-500/15 text-red-400 light:text-red-700' },
   'waiting-for-approval': { label: 'Waiting for approval', className: 'bg-amber-500/15 text-amber-400 light:text-amber-700' },
   approved: { label: 'Approved', className: 'bg-emerald-500/15 text-emerald-400 light:text-emerald-700' },
@@ -12,7 +11,6 @@ export const STATUS_LABEL: Record<PrStatus, { label: string; className: string }
 /** Kanban column order — roughly the lifecycle of a PR. */
 export const STATUS_ORDER: PrStatus[] = [
   'draft',
-  'no-reviewer',
   'waiting-for-approval',
   'changes-requested',
   'approved',
@@ -21,7 +19,6 @@ export const STATUS_ORDER: PrStatus[] = [
 
 export const STATUS_DOT: Record<PrStatus, string> = {
   draft: 'bg-slate-400',
-  'no-reviewer': 'bg-orange-400',
   'changes-requested': 'bg-red-400',
   'waiting-for-approval': 'bg-amber-400',
   approved: 'bg-emerald-400',
@@ -31,7 +28,6 @@ export const STATUS_DOT: Record<PrStatus, string> = {
 /** Soft glow behind each status dot, echoing the column's accent colour. */
 export const STATUS_GLOW: Record<PrStatus, string> = {
   draft: 'shadow-[0_0_9px_2px_rgba(148,163,184,0.45)]',
-  'no-reviewer': 'shadow-[0_0_9px_2px_rgba(251,146,60,0.5)]',
   'changes-requested': 'shadow-[0_0_9px_2px_rgba(248,113,113,0.5)]',
   'waiting-for-approval': 'shadow-[0_0_9px_2px_rgba(251,191,36,0.5)]',
   approved: 'shadow-[0_0_9px_2px_rgba(52,211,153,0.5)]',
@@ -41,7 +37,6 @@ export const STATUS_GLOW: Record<PrStatus, string> = {
 /** Very faint tinted lane background, ~4-6% opacity, per status column. */
 export const STATUS_LANE_BG: Record<PrStatus, string> = {
   draft: 'bg-slate-500/[0.03] border-slate-800/60 light:bg-slate-500/[0.02] light:border-slate-200',
-  'no-reviewer': 'bg-orange-500/[0.04] border-orange-500/[0.12] light:bg-orange-500/[0.03] light:border-orange-500/20',
   'changes-requested': 'bg-red-500/[0.04] border-red-500/[0.12] light:bg-red-500/[0.03] light:border-red-500/20',
   'waiting-for-approval': 'bg-amber-500/[0.04] border-amber-500/[0.12] light:bg-amber-500/[0.03] light:border-amber-500/20',
   approved: 'bg-emerald-500/[0.04] border-emerald-500/[0.12] light:bg-emerald-500/[0.03] light:border-emerald-500/20',

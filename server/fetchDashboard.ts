@@ -264,14 +264,12 @@ function deriveUnaddressedGeneralComment(
 
 function deriveStatus(pr: {
   isDraft: boolean
-  reviewers: Reviewer[]
   reviewDecision: string | null
   mergeStateStatus: string
   hasUnaddressed: boolean
   ciStatus: CiStatus
 }): PrStatus {
   if (pr.isDraft) return 'draft'
-  if (pr.reviewers.length === 0) return 'no-reviewer'
   if (pr.reviewDecision === 'CHANGES_REQUESTED') return 'changes-requested'
   // Unaddressed feedback acts like an informal changes-requested, even when
   // no one has formally blocked the PR through GitHub's review decision.
@@ -306,7 +304,6 @@ function mapPrDetail(nameWithOwner: string, number: number, viewerLogin: string,
     baseRefName: pr.baseRefName,
     status: deriveStatus({
       isDraft: pr.isDraft,
-      reviewers,
       reviewDecision: pr.reviewDecision,
       mergeStateStatus: pr.mergeStateStatus,
       hasUnaddressed: unaddressedThreads.length > 0,

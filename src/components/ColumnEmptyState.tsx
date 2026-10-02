@@ -2,7 +2,6 @@ import type { PrStatus } from '../../server/types'
 
 const COPY: Record<PrStatus, { icon: string; title: string; subtitle: string }> = {
   draft: { icon: '✦', title: 'Nothing in draft', subtitle: 'No drafts right now' },
-  'no-reviewer': { icon: '✦', title: 'Nothing here yet', subtitle: 'Every PR has a reviewer' },
   'waiting-for-approval': { icon: '✦', title: 'Nothing waiting', subtitle: "You're all caught up" },
   'changes-requested': { icon: '✓', title: 'Nothing here yet', subtitle: 'All caught up! 🎉' },
   approved: { icon: '✦', title: 'Nothing approved yet', subtitle: 'Nothing pending a merge check' },
