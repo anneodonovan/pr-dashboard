@@ -123,7 +123,10 @@ export default function App() {
               <UnaddressedToggle enabled={unaddressedOnly} onToggle={toggleUnaddressedOnly} />
             </div>
             <div className="flex items-center gap-3">
-              <CopyLinksButton prs={visiblePrs} sortMode={sortMode} />
+              <CopyLinksButton
+                prs={visiblePrs.filter((pr) => !collapsedColumns.has(pr.status))}
+                sortMode={sortMode}
+              />
               <SortToggle mode={sortMode} onChange={setSortMode} />
             </div>
           </div>
