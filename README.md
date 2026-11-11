@@ -17,7 +17,7 @@ bun install
 bun run dev
 ```
 
-Open the printed local URL. Data refreshes automatically every 60s, or click
+Open the printed local URL. Data refreshes automatically every 15s, or click
 **Refresh** for an immediate update. All GitHub data is fetched server-side
 (in a Vite dev-server middleware) by shelling out to `gh`, so nothing beyond
 the local dev server is required.
